@@ -10,10 +10,10 @@ paths with a useful 404.
 Scope boundary: the hub only. The image and audio applications are read-only references. No
 audio code change is required; its header already targets `/tools/`.
 
-Status: **In progress**. Implementation, local verification, and independent review complete.
-The PR is pending. Deployment is not authorized yet.
+Status: **In progress**. Implementation, local verification, independent review, and the PR are
+complete. CI passes. Deployment is not authorized yet.
 Technical delivery: Complete.
-Agent-verified acceptance: Local and interrogate VERIFIED. PR and live deployment NOT VERIFIED.
+Agent-verified acceptance: Local, interrogate, and CI VERIFIED. Live deployment NOT VERIFIED.
 
 ## Entry criteria
 
@@ -177,9 +177,11 @@ a task without evidence.
   - Tasks:
     - [x] Add `.github/workflows/ci.yml` and `.github/workflows/pages.yml` with the versions and
           permissions recorded in the orchestration plan.
-    - [ ] Create the public `ashcx/tools` repository and enable Pages with
+    - [x] Create the public `ashcx/tools` repository and enable Pages with
           `build_type=workflow`.
-    - [ ] Push `main`, observe the CI and Pages runs, and record the run URLs.
+    - [x] Push the planning base to `main`, push the PR head, and record the CI run:
+          https://github.com/ashcx/tools/actions/runs/41294114960 (conclusion: success).
+    - [ ] Observe the Pages run after the merge.
     - [ ] Run live status-code checks, browser journeys, console/network checks, and
           desktop/mobile light/dark captures.
     - [x] Write `README.md` with the purpose, local development, test, deploy, and privacy
@@ -219,9 +221,9 @@ PR delivery reminder: when the implementation and verification gates pass, push 
 open or update the single sprint PR. Do not wait for pending human acceptance. An eligible
 last-resort exception permits a PR with unfinished work disclosed.
 
-- [ ] The sprint PR links this sprint file, the orchestration plan, the Scrum policy, the
+- [x] The sprint PR links this sprint file, the orchestration plan, the Scrum policy, the
       evidence, and any unfinished-work record.
-- [ ] The PR URL is recorded in this file's References and Execution log, the roadmap, and any
+- [x] The PR URL is recorded in this file's References and Execution log, the roadmap, and any
       unfinished-work record. Bookkeeping is pushed to the same PR branch.
 
 Independent acceptance gates:
@@ -301,7 +303,7 @@ deploy. If deployment is not authorized, the live-URL gate stays NOT VERIFIED.
   `https://ashcx.github.io/audio-toolkit-v1/`.
 - `https://ashcx.github.io/tools/` observed HTTP 404 on 2026-11-01, expected before the hub
   deploys.
-- Sprint PR: not created.
+- Sprint PR: https://github.com/ashcx/tools/pull/1.
 
 ## Execution log
 
@@ -455,3 +457,11 @@ Status: review complete with findings resolved; PR pending.
   broken `redirects.json` from the prior run came from skipping that order.
 - Make a check that can skip into a check that can fail. The no-JS journey now falls back to
   the visible link and throws when neither path works.
+
+### 2026-11-01 — PR and CI
+
+- Opened https://github.com/ashcx/tools/pull/1 from `sprint-1-hub` into `main`.
+- Remote `main` holds the planning commit `9100bee`. The PR head at open was `df83209`.
+- CI run https://github.com/ashcx/tools/actions/runs/41294114960 passed on `df83209`.
+- Pages is enabled with `build_type=workflow`. The Pages run follows the merge and is NOT
+  VERIFIED. The live URL, status codes, and Audio Toolkit return link remain NOT VERIFIED.

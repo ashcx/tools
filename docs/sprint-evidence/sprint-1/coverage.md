@@ -3,7 +3,8 @@
 Authoritative acceptance state. States are VERIFIED, NOT VERIFIED, and INCONCLUSIVE. A check
 is VERIFIED only when a command or browser session produced the recorded result.
 
-Last updated: 2026-11-01, after the independent review and its fixes, before the pull request.
+Last updated: 2026-11-01, after the independent review, its fixes, and the pull request. CI
+passed; deployment is pending.
 
 ## Entry criteria
 
@@ -61,8 +62,8 @@ Last updated: 2026-11-01, after the independent review and its fixes, before the
 
 | Condition | State | Evidence |
 | --- | --- | --- |
-| CI workflow defined and passes on the PR | NOT VERIFIED | `.github/workflows/ci.yml` exists; the PR is not created yet |
-| Pages workflow deploys `public/` | NOT VERIFIED | `.github/workflows/pages.yml` exists; needs a merge to `main` |
+| CI workflow defined and passes on the PR | VERIFIED | `https://github.com/ashcx/tools/actions/runs/41294114960` passed on `df83209` |
+| Pages workflow deploys `public/` | NOT VERIFIED | Pages is enabled with `build_type=workflow`; the run follows the merge |
 | Live status codes and browser journey | NOT VERIFIED | no deployment; `/tools/` returned 404 on 2026-11-01 |
 | Audio Toolkit return link works against the live hub | NOT VERIFIED | no deployment; its source already targets `/tools/` |
 
@@ -78,5 +79,5 @@ Last updated: 2026-11-01, after the independent review and its fixes, before the
 | Unknown paths return 404 with working recovery links | VERIFIED | `checks.txt` http group; `browser-session.md` |
 | Self-review complete and findings resolved | VERIFIED | review findings fixed: no-JS check now fails when both paths break, alias fallback box sizing, read and write storage block, GitHub allowlist removed, Light/768/focus/target/history checks added, 404 arrows hidden, docs aligned |
 | Interrogate gate complete | VERIFIED | `interrogate.md`: two independent read-only reviewers, PASS WITH FINDINGS, findings reproduced, fixed, and rerun; route and effort substitution recorded |
-| Sprint PR open with evidence links | NOT VERIFIED | pending |
+| Sprint PR open with evidence links | VERIFIED | `https://github.com/ashcx/tools/pull/1` |
 | Live URL and deployment evidence | NOT VERIFIED | deployment follows the PR; not authorized yet |

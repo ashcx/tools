@@ -7,8 +7,8 @@ Media Toolkit is a static hub that routes visitors to two browser-local tools:
 - [Audio Toolkit](https://ashcx.github.io/audio-toolkit-v1/) — ordered batch recipes for
   extracting, trimming, processing, and exporting audio.
 
-Status: Sprint 1 implementation, local verification, and independent review complete. The PR is
-not created yet.
+Status: Sprint 1 implementation, local verification, independent review, and the PR are
+complete. Deployment is pending. PR: https://github.com/ashcx/tools/pull/1
 
 Planned site: `https://ashcx.github.io/tools/` (not deployed; observed 404 on 2026-11-01).
 
@@ -36,7 +36,7 @@ older `/media-toolkit/` reference; aligning that sibling document is optional.
 
 | Sprint | Observable outcome | Status |
 | --- | --- | --- |
-| [1](Todo/sprint-1-tool-router.md) | Publish the Media Toolkit hub at `/tools/` with two tool links, route aliases, and a recoverable 404 | In progress |
+| [1](Todo/sprint-1-tool-router.md) | Publish the Media Toolkit hub at `/tools/` with two tool links, route aliases, and a recoverable 404 | PR open |
 
 ## External follow-ups
 
@@ -58,9 +58,10 @@ These are separate repositories. They are not part of the hub PR.
 - [x] `npm test` passes, including link, redirect, accessibility, keyboard, no-JavaScript, and
       404 checks.
 - [x] Desktop and mobile captures are inspected and retained.
-- [ ] Independent interrogate verdict is recorded in
+- [x] Independent interrogate verdict is recorded in
       `docs/sprint-evidence/sprint-1/interrogate.md`.
-- [ ] The sprint PR is open and links the plan, evidence, and verdict.
+- [x] The sprint PR is open and links the plan, evidence, and verdict.
+      https://github.com/ashcx/tools/pull/1
 - [ ] Deployment is observed after merge, within the authorized scope.
 - [ ] The Audio Toolkit return link to `/tools/` is verified live, or recorded as an external
       gap. No audio code change is expected.
@@ -70,5 +71,5 @@ These are separate repositories. They are not part of the hub PR.
 Read [orchestration](Todo/orchestration-plan.md), [Scrum policy](Todo/redesign-scrum-plan.md),
 and [Sprint 1](Todo/sprint-1-tool-router.md).
 
-The user authorized execution on 2026-11-01 and asked for the PR after an independent review.
-Merge and deployment are not authorized yet.
+The PR is open at https://github.com/ashcx/tools/pull/1. Merge and deployment are not
+authorized yet.
