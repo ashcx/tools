@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Media Toolkit</title>
+<meta name="description" content="Two browser-local tools for images and audio: compress images, or process audio and video soundtracks in batches.">
+<script>
+  (function () {
+    var root = document.documentElement;
+    var key = "media-toolkit-theme";
+    var query = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    var stored = "system";
+
+    function readPreference() {
+      try {
+        var value = localStorage.getItem(key);
+        if (value === "light" || value === "dark" || value === "system") {
+          return value;
+        }
+      } catch (error) {
+        return "system";
+      }
+      return "system";
+    }
+
+    function resolve(preference) {
+      if (preference === "dark") {
+        return "dark";
+      }
+      if (preference === "light") {
+        return "light";
+      }
+      return query && query.matches ? "dark" : "light";
+    }
+
+    function paint(preference) {
+      root.dataset.theme = resolve(preference);
+    }
+
+    function save(preference) {
+      try {
+        localStorage.setItem(key, preference);
+      } catch (error) {
+        // A blocked store must not break the page.
+      }
+    }
+
+    stored = readPreference();
+    paint(stored);
+
+    function followSystem() {
+      if (stored === "system") {
+        paint(stored);
+      }
+    }
+
+    function start() {
+      var control = document.querySelector(".theme-control");
+      if (!control) {
+        return;
+      }
+      var current = document.getElementById("theme-" + stored);
+      if (current) {
+        current.checked = true;
+      }
+      control.addEventListener("change", function (event) {
+        var input = event.target;
+        if (!input || input.name !== "theme" || !input.checked) {
+          return;
+        }
+        stored = input.value;
+        paint(stored);
+        save(stored);
+      });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", start);
+    } else {
+      start();
+    }
+
+    if (query && query.addEventListener) {
+      query.addEventListener("change", followSystem);
+    }
+  })();
+</script>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="./">
+      <svg class="brand__mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false">
+        <rect x="3" y="3" width="18" height="18" rx="5"/>
+        <path d="M7.5 11v2"/>
+        <path d="M10.5 8.5v7"/>
+        <path d="M13.5 6.5v11"/>
+        <path d="M16.5 9.5v5"/>
+      </svg>
+      <span>Media Toolkit</span>
+    </a>
+    <fieldset class="theme-control">
+      <legend class="visually-hidden">Theme</legend>
+      <div class="theme-control__segments">
+        <input class="theme-control__input" type="radio" name="theme" id="theme-system" value="system" checked>
+        <label class="theme-control__option" for="theme-system">System</label>
+        <input class="theme-control__input" type="radio" name="theme" id="theme-light" value="light">
+        <label class="theme-control__option" for="theme-light">Light</label>
+        <input class="theme-control__input" type="radio" name="theme" id="theme-dark" value="dark">
+        <label class="theme-control__option" for="theme-dark">Dark</label>
+      </div>
+    </fieldset>
+  </div>
+</header>
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    <div class="hero">
+      <h1>Media Toolkit</h1>
+      <p class="hero__lede">Two browser-local tools for images and audio, each processing files on your device.</p>
+    </div>
+    <section class="tool-grid" aria-label="Tools">
+      <a class="tool-card tool-card--image" href="./image-compressor/" aria-labelledby="tool-image-title" aria-describedby="tool-image-summary">
+        <span class="tool-card__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <rect x="3" y="4" width="18" height="16" rx="3"/>
+            <circle cx="8.5" cy="9.5" r="1.5"/>
+            <path d="M4 17.5l4.4-4.6a1.6 1.6 0 0 1 2.3 0l3.1 3.2"/>
+            <path d="M13.4 14.6l1.8-1.9a1.6 1.6 0 0 1 2.3 0l2.5 2.6"/>
+          </svg>
+        </span>
+        <h2 class="tool-card__title" id="tool-image-title">Image Compressor</h2>
+        <p class="tool-card__lead" id="tool-image-summary">Compress, convert, and resize images in batches.</p>
+        <dl class="tool-card__facts">
+          <div class="tool-card__fact">
+            <dt>Formats</dt>
+            <dd>JPEG, PNG, WebP, AVIF and HEIC</dd>
+          </div>
+          <div class="tool-card__fact">
+            <dt>Privacy</dt>
+            <dd>Images are processed in the browser and are not uploaded.</dd>
+          </div>
+          <div class="tool-card__fact">
+            <dt>Caveat</dt>
+            <dd>AVIF and HEIC encoding is slower, and the size estimates are guidance, not a guarantee.</dd>
+          </div>
+        </dl>
+        <span class="tool-card__cta" aria-hidden="true">
+          Open tool
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <path d="M3 8h10"/>
+            <path d="M9 4l4 4-4 4"/>
+          </svg>
+        </span>
+      </a>
+      <a class="tool-card tool-card--audio" href="./audio-toolkit/" aria-labelledby="tool-audio-title" aria-describedby="tool-audio-summary">
+        <span class="tool-card__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" focusable="false">
+            <path d="M4 10v4"/>
+            <path d="M8 7v10"/>
+            <path d="M12 4v16"/>
+            <path d="M16 8v8"/>
+            <path d="M20 11v2"/>
+          </svg>
+        </span>
+        <h2 class="tool-card__title" id="tool-audio-title">Audio Toolkit</h2>
+        <p class="tool-card__lead" id="tool-audio-summary">Process a batch of audio or video soundtracks with one ordered recipe.</p>
+        <dl class="tool-card__facts">
+          <div class="tool-card__fact">
+            <dt>Capabilities</dt>
+            <dd>Extract, trim, gain, normalize, channels, sample rate, voice or music isolation, speech cleanup</dd>
+          </div>
+          <div class="tool-card__fact">
+            <dt>Formats</dt>
+            <dd>MP3, AAC/M4A, WAV, FLAC and Opus/OGG</dd>
+          </div>
+          <div class="tool-card__fact">
+            <dt>Privacy</dt>
+            <dd>Media is processed locally and files are not uploaded.</dd>
+          </div>
+          <div class="tool-card__fact">
+            <dt>Caveat</dt>
+            <dd>Isolation can take minutes and results vary, and browser support varies for some codecs.</dd>
+          </div>
+        </dl>
+        <span class="tool-card__cta" aria-hidden="true">
+          Open tool
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <path d="M3 8h10"/>
+            <path d="M9 4l4 4-4 4"/>
+          </svg>
+        </span>
+      </a>
+    </section>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <p class="site-footer__privacy">No cookies, no analytics, and no third-party requests. The only thing this page stores is your theme choice.</p>
+    <ul class="footer-links">
+      <li><a href="https://github.com/ashcx/tools">Hub repository</a></li>
+      <li><a href="https://github.com/ashcx/image-compressor-v1">Image Compressor repository</a></li>
+      <li><a href="https://github.com/ashcx/audio-toolkit-v1">Audio Toolkit repository</a></li>
+    </ul>
+  </div>
+</footer>
+</body>
+</html>
