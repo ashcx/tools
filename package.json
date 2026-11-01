@@ -1,0 +1,14 @@
+{
+  "name": "media-toolkit-hub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static Media Toolkit hub served from /tools/ on GitHub Pages",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "test": "node scripts/verify.mjs"
+  }
+}
