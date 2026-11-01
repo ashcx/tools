@@ -1,0 +1,108 @@
+# Sprint 1 local checks
+
+Run from 2026-11-01T10:50:59.264Z to 2026-11-01T10:51:08.033Z.524Z to 2026-11-01T10:50:01.164Z.
+Node: v22.11.0  npm: 10.9.0
+Playwright: 1.64.1  html-validate: 10.0.0  axe: 4.13.0
+
+The negative controls ran before the final clean run. That clean run restored `redirects.json`
+and `accessibility.json`, so both files match the result below, not a broken fixture.
+
+The final run came after the user asked for a Settings button that opens a popup card with the
+dark mode selector. The inline theme control moved into a native dialog, the keyboard journey
+and axe scans were extended, and the Settings light and dark captures were added. The negative
+controls were rerun against copies of the updated public tree and still exit 1.
+
+## HTML validation
+
+$ npm run validate
+
+> media-toolkit-hub@1.0.0 validate
+> html-validate public
+
+exit=0
+
+## Full suite
+
+$ npm test
+
+> media-toolkit-hub@1.0.0 test
+> node scripts/verify.mjs
+
+PASS links (0.0s)
+PASS redirects (0.0s)
+PASS html (0.2s)
+PASS http (0.0s)
+PASS browser (6.4s)
+PASS axe (2.2s)
+PASS captures (0.7s)
+PASS all 7 groups in 9.5s
+exit=0
+
+## Lockfile check
+
+$ npm ci --dry-run
+
+up to date in 185ms
+
+exit=0
+
+## Negative control 1: wrong alias destination
+
+The audio alias in /tmp/mt-neg-alias points at https://example.com/audio/ instead of the live app.
+
+$ node scripts/verify.mjs --only redirects --public /tmp/mt-neg-alias
+FAIL redirects (0.0s)
+  1 alias assertion(s) failed
+  /tools/audio-toolkit/ fails canonical
+    expected ["https://ashcx.github.io/audio-toolkit-v1/"]
+    actual   ["https://example.com/audio/"]
+FAIL 1 of 1 groups in 0.0s: redirects
+exit=1
+fixture removed: yes
+
+## Negative control 2: third-party request in the hub
+
+The hub in /tmp/mt-neg-link contains <img src="https://tracker.example/pixel.png">.
+
+$ node scripts/verify.mjs --only links --public /tmp/mt-neg-link
+FAIL links (0.0s)
+  <img src="https://tracker.example/pixel.png"> in index.html is an absolute URL outside the allowlist
+    expected ["https://ashcx.github.io/image-compressor-v1/","https://ashcx.github.io/audio-toolkit-v1/"]
+    actual   "https://tracker.example/pixel.png"
+FAIL 1 of 1 groups in 0.0s: links
+exit=1
+fixture removed: yes
+
+## Negative control 3: no-JavaScript alias with both paths broken
+
+The audio alias in /tmp/mt-neg-nojs has no noscript refresh, and its visible fallback points at
+https://example.com/audio/. The alias still has the correct canonical URL and location.replace.
+
+$ node scripts/verify.mjs --only browser --public /tmp/mt-neg-nojs
+FAIL browser (16.1s)
+  [chromium] alias without JavaScript: /tools/audio-toolkit/ does not reach https://ashcx.github.io/audio-toolkit-v1/ with JavaScript disabled
+    expected the noscript refresh or the visible fallback to navigate
+    actual   neither path reached the destination
+FAIL 1 of 1 groups in 16.1s: browser
+exit=1
+fixture removed: yes
+
+## Deployed artifact
+
+The artifact is the contents of public/ only.
+
+public/.nojekyll
+public/404.html
+public/audio-toolkit/index.html
+public/favicon.svg
+public/image-compressor/index.html
+public/index.html
+public/styles.css
+
+No test dependency, source map, or development file is present.
+
+## Captures
+
+docs/sprint-evidence/sprint-1/captures/ now holds desktop-light.png, desktop-dark.png,
+tablet-768.png, mobile-light.png, mobile-dark.png, mobile-320.png, settings-light.png,
+settings-dark.png, 404.png, and redirect-no-js.png.

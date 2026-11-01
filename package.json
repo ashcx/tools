@@ -8,7 +8,15 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "node scripts/serve.mjs",
-    "test": "node scripts/verify.mjs"
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs && node scripts/serve.mjs",
+    "validate": "node scripts/build.mjs && html-validate public",
+    "test": "node scripts/build.mjs && node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "html-validate": "^10.0.0",
+    "js-yaml": "^5.5.0",
+    "playwright": "^1.64.1"
   }
 }

@@ -1,0 +1,137 @@
+{
+  "checkedAt": "2026-11-01T10:50:59.264Z",
+  "aliases": [
+    {
+      "route": "/tools/image-compressor/",
+      "destination": "https://ashcx.github.io/image-compressor-v1/",
+      "assertions": {
+        "title": {
+          "pass": true,
+          "expected": "Image Compressor",
+          "actual": "Image Compressor"
+        },
+        "robotsNoindex": {
+          "pass": true,
+          "expected": [
+            "noindex"
+          ],
+          "actual": [
+            "noindex"
+          ]
+        },
+        "canonical": {
+          "pass": true,
+          "expected": [
+            "https://ashcx.github.io/image-compressor-v1/"
+          ],
+          "actual": [
+            "https://ashcx.github.io/image-compressor-v1/"
+          ]
+        },
+        "locationReplace": {
+          "pass": true,
+          "expected": "https://ashcx.github.io/image-compressor-v1/",
+          "actual": "https://ashcx.github.io/image-compressor-v1/"
+        },
+        "noscriptRefresh": {
+          "pass": true,
+          "expected": "https://ashcx.github.io/image-compressor-v1/",
+          "actual": "0; url=https://ashcx.github.io/image-compressor-v1/"
+        },
+        "visibleAnchor": {
+          "pass": true,
+          "expected": "a visible anchor to https://ashcx.github.io/image-compressor-v1/",
+          "actual": [
+            {
+              "href": "https://ashcx.github.io/image-compressor-v1/",
+              "text": "Open Image Compressor"
+            },
+            {
+              "href": "../",
+              "text": "Back to Media Toolkit"
+            }
+          ]
+        },
+        "hubLink": {
+          "pass": true,
+          "expected": "a relative link back to the hub, './' or '../'",
+          "actual": [
+            "https://ashcx.github.io/image-compressor-v1/",
+            "../"
+          ]
+        },
+        "noLocalAssets": {
+          "pass": true,
+          "expected": [],
+          "actual": []
+        }
+      }
+    },
+    {
+      "route": "/tools/audio-toolkit/",
+      "destination": "https://ashcx.github.io/audio-toolkit-v1/",
+      "assertions": {
+        "title": {
+          "pass": true,
+          "expected": "Audio Toolkit",
+          "actual": "Audio Toolkit"
+        },
+        "robotsNoindex": {
+          "pass": true,
+          "expected": [
+            "noindex"
+          ],
+          "actual": [
+            "noindex"
+          ]
+        },
+        "canonical": {
+          "pass": true,
+          "expected": [
+            "https://ashcx.github.io/audio-toolkit-v1/"
+          ],
+          "actual": [
+            "https://ashcx.github.io/audio-toolkit-v1/"
+          ]
+        },
+        "locationReplace": {
+          "pass": true,
+          "expected": "https://ashcx.github.io/audio-toolkit-v1/",
+          "actual": "https://ashcx.github.io/audio-toolkit-v1/"
+        },
+        "noscriptRefresh": {
+          "pass": true,
+          "expected": "https://ashcx.github.io/audio-toolkit-v1/",
+          "actual": "0; url=https://ashcx.github.io/audio-toolkit-v1/"
+        },
+        "visibleAnchor": {
+          "pass": true,
+          "expected": "a visible anchor to https://ashcx.github.io/audio-toolkit-v1/",
+          "actual": [
+            {
+              "href": "https://ashcx.github.io/audio-toolkit-v1/",
+              "text": "Open Audio Toolkit"
+            },
+            {
+              "href": "../",
+              "text": "Back to Media Toolkit"
+            }
+          ]
+        },
+        "hubLink": {
+          "pass": true,
+          "expected": "a relative link back to the hub, './' or '../'",
+          "actual": [
+            "https://ashcx.github.io/audio-toolkit-v1/",
+            "../"
+          ]
+        },
+        "noLocalAssets": {
+          "pass": true,
+          "expected": [],
+          "actual": []
+        }
+      }
+    }
+  ]
+}

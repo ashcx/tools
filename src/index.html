@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<script>
+  (function () {
+    var root = document.documentElement;
+    var key = "media-toolkit-theme";
+    var query = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    var stored = "system";
+
+    function readPreference() {
+      try {
+        var value = localStorage.getItem(key);
+        if (value === "light" || value === "dark" || value === "system") {
+          return value;
+        }
+      } catch (error) {
+        return "system";
+      }
+      return "system";
+    }
+
+    function resolve(preference) {
+      if (preference === "dark") {
+        return "dark";
+      }
+      if (preference === "light") {
+        return "light";
+      }
+      return query && query.matches ? "dark" : "light";
+    }
+
+    function paint(preference) {
+      root.dataset.theme = resolve(preference);
+    }
+
+    function save(preference) {
+      try {
+        localStorage.setItem(key, preference);
+      } catch (error) {
+        // A blocked store must not break the page.
+      }
+    }
+
+    stored = readPreference();
+    paint(stored);
+
+    function followSystem() {
+      if (stored === "system") {
+        paint(stored);
+      }
+    }
+
+    function start() {
+      var control = document.querySelector(".theme-control");
+      var dialog = document.getElementById("settings-dialog");
+      var open = document.getElementById("settings-open");
+      var close = document.getElementById("settings-close");
+
+      if (control) {
+        var current = document.getElementById("theme-" + stored);
+        if (current) {
+          current.checked = true;
+        }
+        control.addEventListener("change", function (event) {
+          var input = event.target;
+          if (!input || input.name !== "theme" || !input.checked) {
+            return;
+          }
+          stored = input.value;
+          paint(stored);
+          save(stored);
+        });
+      }
+
+      if (dialog && open) {
+        open.addEventListener("click", function () {
+          if (!dialog.open) {
+            dialog.showModal();
+          }
+          open.setAttribute("aria-expanded", "true");
+        });
+        if (close) {
+          close.addEventListener("click", function () {
+            dialog.close();
+          });
+        }
+        dialog.addEventListener("close", function () {
+          open.setAttribute("aria-expanded", "false");
+          open.focus();
+        });
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", start);
+    } else {
+      start();
+    }
+
+    if (query && query.addEventListener) {
+      query.addEventListener("change", followSystem);
+    }
+  })();
+</script>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <button class="settings-button" type="button" id="settings-open" aria-haspopup="dialog" aria-controls="settings-dialog" aria-expanded="false">
+      <svg class="settings-button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="3.2"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </div>
+</header>
+<main id="main" tabindex="-1">
+  <div class="wrap stage">
+    <div class="brand">
+      <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <rect class="brand__plate" x="2" y="2" width="60" height="60" rx="16"/>
+        <g class="brand__bars">
+          <path d="M20 27v10"/>
+          <path d="M28 20v24"/>
+          <path d="M36 14v36"/>
+          <path d="M44 23v18"/>
+        </g>
+      </svg>
+      <h1 class="brand__name">{{title}}</h1>
+      <p class="brand__lede">{{lede}}</p>
+    </div>
+    <nav class="tool-grid" aria-label="Tools">
+{{tools}}
+    </nav>
+  </div>
+</main>
+<dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+  <div class="settings-dialog__head">
+    <h2 id="settings-title">Settings</h2>
+    <button class="settings-close" type="button" id="settings-close">Close</button>
+  </div>
+  <section class="settings-card" aria-labelledby="settings-appearance">
+    <h3 id="settings-appearance">Appearance</h3>
+    <div class="settings-field">
+      <span class="settings-field__label">Theme</span>
+      <fieldset class="theme-control">
+        <legend class="visually-hidden">Theme</legend>
+        <div class="theme-control__segments">
+          <input class="theme-control__input" type="radio" name="theme" id="theme-system" value="system" checked>
+          <label class="theme-control__option" for="theme-system">System</label>
+          <input class="theme-control__input" type="radio" name="theme" id="theme-light" value="light">
+          <label class="theme-control__option" for="theme-light">Light</label>
+          <input class="theme-control__input" type="radio" name="theme" id="theme-dark" value="dark">
+          <label class="theme-control__option" for="theme-dark">Dark</label>
+        </div>
+      </fieldset>
+      <span class="settings-field__hint">System follows your operating system's light or dark setting.</span>
+    </div>
+  </section>
+</dialog>
+</body>
+</html>
