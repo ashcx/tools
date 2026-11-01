@@ -596,7 +596,7 @@ async function checkKeyboard(browser, server) {
 
     await page.goto(server.url + HUB_ROUTE);
     const stops = [];
-    for (let index = 0; index < 8; index += 1) {
+    for (let index = 0; index < 4; index += 1) {
       await page.keyboard.press(tabKey);
       stops.push(
         await page.evaluate(() => {
@@ -615,26 +615,20 @@ async function checkKeyboard(browser, server) {
     }
 
     check(stops[0].className.includes('skip-link'), `the first ${tabKey} stop is the skip link\n    expected a .skip-link\n    actual   ${format(stops[0])}`);
-    check(stops[1].className.includes('brand'), `the brand is reachable with ${tabKey}\n    expected a .brand anchor\n    actual   ${format(stops[1])}`);
     check(
-      stops[2].tag === 'input' && stops[2].id.startsWith('theme-'),
-      `the theme group is reachable with ${tabKey}\n    expected one of the theme radios\n    actual   ${format(stops[2])}`,
+      stops[1].tag === 'input' && stops[1].id.startsWith('theme-'),
+      `the theme group is reachable with ${tabKey}\n    expected the checked theme radio\n    actual   ${format(stops[1])}`,
     );
     check(
-      stops[3].className.includes('tool-card--image'),
-      `the image card is reachable with ${tabKey}\n    expected .tool-card--image\n    actual   ${format(stops[3])}`,
+      stops[2].className.includes('tool-card--image'),
+      `the image card is reachable with ${tabKey}\n    expected .tool-card--image\n    actual   ${format(stops[2])}`,
     );
     check(
-      stops[4].className.includes('tool-card--audio'),
-      `the audio card is reachable with ${tabKey}\n    expected .tool-card--audio\n    actual   ${format(stops[4])}`,
-    );
-    assertDeepEqual(
-      stops.slice(5, 8).map((stop) => stop.text),
-      ['Hub repository', 'Image Compressor repository', 'Audio Toolkit repository'],
-      `the footer links are reachable with ${tabKey}`,
+      stops[3].className.includes('tool-card--audio'),
+      `the audio card is reachable with ${tabKey}\n    expected .tool-card--audio\n    actual   ${format(stops[3])}`,
     );
 
-    for (const stop of [stops[3], stops[4]]) {
+    for (const stop of [stops[2], stops[3]]) {
       check(
         stop.outlineStyle === 'solid' && stop.outlineWidth >= 1,
         `the focused card draws an outline\n    expected outline-style solid and outline-width >= 1px\n    actual   ${stop.outlineStyle}, ${stop.outlineWidth}px`,

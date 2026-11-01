@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-01T07:35:34.558Z",
+  "checkedAt": "2026-11-01T09:17:19.805Z",
   "aliases": [
     {
       "route": "/tools/image-compressor/",
@@ -86,30 +86,30 @@
           ]
         },
         "canonical": {
-          "pass": false,
+          "pass": true,
           "expected": [
             "https://ashcx.github.io/audio-toolkit-v1/"
           ],
           "actual": [
-            "https://example.com/audio/"
+            "https://ashcx.github.io/audio-toolkit-v1/"
           ]
         },
         "locationReplace": {
-          "pass": false,
+          "pass": true,
           "expected": "https://ashcx.github.io/audio-toolkit-v1/",
-          "actual": "https://example.com/audio/"
+          "actual": "https://ashcx.github.io/audio-toolkit-v1/"
         },
         "noscriptRefresh": {
-          "pass": false,
+          "pass": true,
           "expected": "https://ashcx.github.io/audio-toolkit-v1/",
-          "actual": "0; url=https://example.com/audio/"
+          "actual": "0; url=https://ashcx.github.io/audio-toolkit-v1/"
         },
         "visibleAnchor": {
-          "pass": false,
+          "pass": true,
           "expected": "a visible anchor to https://ashcx.github.io/audio-toolkit-v1/",
           "actual": [
             {
-              "href": "https://example.com/audio/",
+              "href": "https://ashcx.github.io/audio-toolkit-v1/",
               "text": "Open Audio Toolkit"
             },
             {
@@ -122,7 +122,7 @@
           "pass": true,
           "expected": "a relative link back to the hub, './' or '../'",
           "actual": [
-            "https://example.com/audio/",
+            "https://ashcx.github.io/audio-toolkit-v1/",
             "../"
           ]
         },
