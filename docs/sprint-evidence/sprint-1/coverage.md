@@ -24,22 +24,24 @@ passed; deployment is pending.
 
 | Condition | State | Evidence |
 | --- | --- | --- |
-| Logo, name, one descriptor, two tool links with short summaries; no fact lists, footer, or repository links | VERIFIED | `checkLayout` asserts the h1 text, descriptor, header-only theme control, zero footers, two aria-labelled cards, and both short summaries; `captures/desktop-light.png`; `captures/mobile-light.png` |
+| Logo, name, one descriptor, two tool links with short summaries; no fact lists, footer, or repository links | VERIFIED | `checkLayout` asserts the h1 text, descriptor, header Settings button, zero footers, two aria-labelled cards, and both short summaries; `captures/desktop-light.png`; `captures/mobile-light.png` |
 | Both links reach the destination with JavaScript disabled | VERIFIED | `checkAliasWithoutJavaScript` in Chromium and WebKit; `checkAliasFallbackLayout`; negative control 3 fails when both paths break; `captures/redirect-no-js.png` |
-| One `h1`, two `h2`, landmarks, skip link, no nested interactive elements | VERIFIED | `checkLayout` asserts one h1, two h2 inside the cards, `banner`, `main`, `nav`, zero nested interactive elements; `checkKeyboard`; `accessibility.json` zero violations |
+| One `h1`, three `h2`, landmarks, skip link, no nested interactive elements | VERIFIED | `checkLayout` asserts one h1, three h2 (Settings and the two cards), `banner`, `main`, `nav`, zero nested interactive elements; `checkKeyboard`; `accessibility.json` zero violations |
 
 ### S1-US02 responsive, themed, accessible
 
 | Condition | State | Evidence |
 | --- | --- | --- |
-| Hub matches the standard Settings style and font of the two apps; neither app is modified | VERIFIED | user instruction 2026-11-01; `content-freeze.md` token table; `captures/desktop-light.png`; sibling worktrees show only the pre-existing navigation-handoff edits, no settings or style change |
+| Hub matches the standard Settings style and font of the two apps; neither app is modified | VERIFIED | user instruction 2026-11-01; `content-freeze.md` token table; `captures/settings-light.png`; sibling worktrees show only the pre-existing navigation-handoff edits, no settings or style change |
+| Settings button opens a labeled modal dialog with the Appearance card, Theme segmented control, and hint | VERIFIED | `checkLayout` asserts the button wiring, closed initial state, dialog name, dialog targets, and a 320px fit with no overflow; `captures/settings-light.png`; `captures/settings-dark.png` |
+| Close and Escape close the dialog and return focus to the Settings button | VERIFIED | `checkLayout` asserts `aria-expanded`; `checkKeyboard` opens from the keyboard, checks trapped focus and the focus ring, and asserts Escape restores the button |
 | No overflow at 320, 390, 768, 1440 and readable in light and dark | VERIFIED | `checkLayout` at all four widths in light and dark; `captures/mobile-320.png`; `captures/tablet-768.png` |
 | Cards stack below 760px and fit at the breakpoint | VERIFIED | `checkLayout` asserts stacked at 390 and 759, side by side at 768 and 1440 |
-| Focus visible and targets at least 44px | VERIFIED | `checkKeyboard` asserts outlines on the skip link, theme option, and both cards; `checkLayout` asserts 44 by 44 minimum on the skip link, theme options, and cards |
+| Focus visible and targets at least 44px | VERIFIED | `checkKeyboard` asserts outlines on the skip link, Settings button, theme option, and both cards; `checkLayout` asserts 44 by 44 minimum on the skip link, Settings button, Close, theme options, and cards |
 | Light, Dark, and System persist in `localStorage["media-toolkit-theme"]` | VERIFIED | `checkTheme` asserts all three choices, checked radios, storage values, and reload persistence; System follows a live scheme change |
 | Reduced motion disables transitions | VERIFIED | `checkReducedMotion` gets a 0s card transition |
 | Blocked storage does not blank the page | VERIFIED | `checkBlockedStorage` throws from both `getItem` and `setItem`; the hub renders and a theme choice applies |
-| axe has no serious or critical violation in light and dark | VERIFIED | `accessibility.json`: four runs, zero violations of any impact |
+| axe has no serious or critical violation in light and dark, with the popup closed and open | VERIFIED | `accessibility.json`: eight runs (Chromium and WebKit, light and dark, popup closed and open), zero violations of any impact |
 
 ### S1-US03 aliases and 404
 

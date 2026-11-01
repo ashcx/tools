@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-01T10:38:37.599Z",
+  "checkedAt": "2026-11-01T10:51:08.033Z",
   "tags": [
     "wcag2a",
     "wcag2aa",
@@ -14,6 +14,20 @@
     {
       "engine": "chromium",
       "theme": "light",
+      "dialog": false,
+      "counts": {
+        "violations": 0,
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "violations": []
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "dialog": true,
       "counts": {
         "violations": 0,
         "serious": 0,
@@ -26,6 +40,20 @@
     {
       "engine": "chromium",
       "theme": "dark",
+      "dialog": false,
+      "counts": {
+        "violations": 0,
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "violations": []
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "dialog": true,
       "counts": {
         "violations": 0,
         "serious": 0,
@@ -38,6 +66,20 @@
     {
       "engine": "webkit",
       "theme": "light",
+      "dialog": false,
+      "counts": {
+        "violations": 0,
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "violations": []
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "dialog": true,
       "counts": {
         "violations": 0,
         "serious": 0,
@@ -50,6 +92,20 @@
     {
       "engine": "webkit",
       "theme": "dark",
+      "dialog": false,
+      "counts": {
+        "violations": 0,
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "violations": []
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "dialog": true,
       "counts": {
         "violations": 0,
         "serious": 0,

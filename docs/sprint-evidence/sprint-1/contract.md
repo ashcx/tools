@@ -26,9 +26,14 @@ Document element:
 Header:
 
 - `a.skip-link[href="#main"]` is the first focusable element.
-- `header.site-header` contains only the theme control. There is no brand link in the header.
-- The theme control is a `fieldset.theme-control` with `legend.visually-hidden` text `Theme`
-  and three radios, all named `theme`, in this order: `#theme-system`, `#theme-light`,
+- `header.site-header` contains only the Settings button. There is no brand link in the header.
+- The Settings button is `button#settings-open` with `aria-haspopup="dialog"`,
+  `aria-controls="settings-dialog"`, and `aria-expanded`. It holds a decorative gear icon and
+  the text `Settings`.
+- `dialog#settings-dialog` starts closed. It is named by its `h2#settings-title` (`Settings`) and
+  holds a `Close` button, one `section.settings-card` titled `Appearance` by its `h3`, a `Theme`
+  label, and a `fieldset.theme-control` with `legend.visually-hidden` text `Theme`.
+- The theme radios are all named `theme`, in this order: `#theme-system`, `#theme-light`,
   `#theme-dark`.
 
 Main:
@@ -45,12 +50,13 @@ Main:
   and its summary `Trim, process, export audio`.
 - Each card names its heading with `aria-labelledby` and its summary with `aria-describedby`.
   The arrow is decorative and inside an `aria-hidden` element.
-- Exactly two `h2` elements on the page, both inside the cards.
+- Exactly three `h2` elements: the Settings dialog title and the two card headings.
 - No interactive element inside a card.
 
 The page has no footer. It has no format list, privacy statement, caveat, call-to-action label,
 per-tool icon, or repository link. The visible copy is the brand, one descriptor line, two tool
-names, two short summaries, and the three theme labels.
+names, two short summaries, the `Settings` trigger, and the dialog copy: `Settings`, `Close`,
+`Appearance`, `Theme`, the three theme labels, and the System hint.
 
 Theme behaviour:
 
@@ -59,13 +65,20 @@ Theme behaviour:
 - `system` follows `prefers-color-scheme` and reacts to changes while the page is open.
 - An unavailable `localStorage` must not throw or blank the page.
 - Selecting a radio updates `data-theme`, the radio checked state, and storage.
+- The Settings button opens the dialog with `showModal()`, sets `aria-expanded="true"`, and the
+  browser moves focus inside.
+- `Close` and Escape close the dialog, set `aria-expanded="false"`, and return focus to the
+  Settings button.
 
 Keyboard order:
 
 1. Skip link.
-2. The checked theme radio.
+2. The Settings button.
 3. The Image Compressor card.
 4. The Audio Toolkit card.
+
+While the dialog is open, focus stays inside it: the Close button, then the checked theme radio,
+then back to Close.
 
 Layout:
 

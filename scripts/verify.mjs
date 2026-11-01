@@ -444,7 +444,25 @@ async function waitForTheme(page, expected, message) {
 }
 
 async function clickThemeLabel(page, name) {
+  await openSettings(page);
   await page.locator(`label[for="theme-${name}"]`).click();
+}
+
+async function openSettings(page) {
+  if (await page.evaluate(() => document.getElementById('settings-dialog')?.open === true)) {
+    return;
+  }
+  await page.locator('#settings-open').click();
+  await page.waitForFunction(() => document.getElementById('settings-dialog')?.open === true);
+}
+
+async function closeSettingsWithEscape(page) {
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => {
+    const dialog = document.getElementById('settings-dialog');
+    const button = document.getElementById('settings-open');
+    return dialog?.open === false && button?.getAttribute('aria-expanded') === 'false';
+  });
 }
 
 async function checkLayout(browser, server) {
@@ -460,7 +478,19 @@ async function checkLayout(browser, server) {
       'the descriptor is one short line',
     );
     assertEqual(await page.locator('header a').count(), 0, 'the header has no brand link');
-    assertEqual(await page.locator('header .theme-control').count(), 1, 'the header holds the theme control');
+    assertEqual(await page.locator('header .settings-button').count(), 1, 'the header holds the Settings button');
+    assertEqual(await page.locator('header .theme-control').count(), 0, 'the theme control is not inline in the header');
+    assertEqual(await page.locator('#settings-dialog').count(), 1, 'the page holds one settings dialog');
+    assertEqual(
+      await page.locator('#settings-dialog').getAttribute('aria-labelledby'),
+      'settings-title',
+      'the settings dialog is named by its title',
+    );
+    assertEqual(
+      await page.locator('#settings-dialog').evaluate((dialog) => dialog.open),
+      false,
+      'the settings dialog starts closed',
+    );
     assertEqual(await page.locator('nav.tool-grid').count(), 1, 'the tools sit in one navigation region');
     assertEqual(await page.locator('footer').count(), 0, 'the hub has no footer');
     assertEqual(
@@ -468,7 +498,7 @@ async function checkLayout(browser, server) {
       0,
       'the page has no footer, fact list, or call to action',
     );
-    assertEqual(await page.locator('h2').count(), 2, 'the hub has exactly two h2');
+    assertEqual(await page.locator('h2').count(), 3, 'the page has three h2: the two cards and Settings');
     assertEqual(await page.locator('.tool-card').count(), 2, 'the hub has exactly two cards');
     assertEqual(await page.locator('.tool-card h2').count(), 2, 'both h2 sit inside the cards');
     assertDeepEqual(
@@ -514,7 +544,7 @@ async function checkLayout(browser, server) {
     }
 
     const targets = await page
-      .locator('.skip-link, .theme-control__option, .tool-card')
+      .locator('.skip-link, .settings-button, .tool-card')
       .evaluateAll((elements) =>
         elements.map((element) => {
           const rect = element.getBoundingClientRect();
@@ -527,6 +557,34 @@ async function checkLayout(browser, server) {
         `the ${target.label} target is at least 44 by 44\n    expected width and height >= 44\n    actual   ${target.width} by ${target.height}`,
       );
     }
+
+    await openSettings(page);
+    assertEqual(
+      await page.locator('#settings-open').getAttribute('aria-expanded'),
+      'true',
+      'opening Settings updates aria-expanded',
+    );
+    assertEqual(await page.locator('.settings-dialog .theme-control').count(), 1, 'the dialog holds the theme control');
+    const dialogTargets = await page
+      .locator('.settings-close, .theme-control__option')
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const rect = element.getBoundingClientRect();
+          return { label: element.className || element.tagName.toLowerCase(), width: rect.width, height: rect.height };
+        }),
+      );
+    for (const target of dialogTargets) {
+      check(
+        target.width >= 44 && target.height >= 44,
+        `the ${target.label} target is at least 44 by 44\n    expected width and height >= 44\n    actual   ${target.width} by ${target.height}`,
+      );
+    }
+    await closeSettingsWithEscape(page);
+    assertEqual(
+      await page.locator('#settings-open').getAttribute('aria-expanded'),
+      'false',
+      'closing Settings resets aria-expanded',
+    );
 
     for (const [width, stacked] of [
       [390, true],
@@ -567,6 +625,27 @@ async function checkLayout(browser, server) {
         );
       }
     }
+
+    await page.setViewportSize({ width: 320, height: MOBILE.height });
+    await openSettings(page);
+    const dialogMetrics = await page.evaluate(() => {
+      const dialog = document.getElementById('settings-dialog');
+      const rect = dialog.getBoundingClientRect();
+      return {
+        left: rect.left,
+        right: rect.right,
+        scrollWidth: dialog.scrollWidth,
+        clientWidth: dialog.clientWidth,
+      };
+    });
+    check(
+      dialogMetrics.left >= 0 && dialogMetrics.right <= 320 + 1,
+      `the Settings popup fits at 320\n    expected 0 <= left and right <= 321\n    actual   left ${format(dialogMetrics.left)}, right ${format(dialogMetrics.right)}`,
+    );
+    check(
+      dialogMetrics.scrollWidth <= dialogMetrics.clientWidth + 1,
+      `the Settings popup does not overflow at 320\n    expected scrollWidth <= ${dialogMetrics.clientWidth + 1}\n    actual   scrollWidth ${dialogMetrics.scrollWidth}`,
+    );
   });
 }
 
@@ -577,6 +656,7 @@ async function checkTheme(browser, server) {
       await page.goto(server.url + HUB_ROUTE);
       assertEqual(await storedTheme(page), null, `nothing is stored on a first visit under a ${scheme} scheme`);
       assertEqual(await themeOf(page), scheme, `data-theme follows prefers-color-scheme ${scheme}`);
+      await openSettings(page);
       assertEqual(
         await page.locator('#theme-system').isChecked(),
         true,
@@ -601,6 +681,7 @@ async function checkTheme(browser, server) {
 
     await page.reload();
     assertEqual(await themeOf(page), 'dark', 'data-theme stays dark after a reload');
+    await openSettings(page);
     assertEqual(await page.locator('#theme-dark').isChecked(), true, 'the dark radio stays checked after a reload');
 
     await page.emulateMedia({ colorScheme: 'dark' });
@@ -620,6 +701,7 @@ async function checkTheme(browser, server) {
     assertEqual(await page.locator('#theme-light').isChecked(), true, 'choosing light checks the light radio');
     await page.reload();
     assertEqual(await themeOf(page), 'light', 'data-theme stays light after a reload');
+    await openSettings(page);
     assertEqual(await page.locator('#theme-light').isChecked(), true, 'the light radio stays checked after a reload');
   });
 }
@@ -694,8 +776,8 @@ async function checkKeyboard(browser, server) {
 
     check(stops[0].className.includes('skip-link'), `the first ${tabKey} stop is the skip link\n    expected a .skip-link\n    actual   ${format(stops[0])}`);
     check(
-      stops[1].tag === 'input' && stops[1].id.startsWith('theme-') && stops[1].checked === true,
-      `the theme group is reachable with ${tabKey}\n    expected the checked theme radio\n    actual   ${format(stops[1])}`,
+      stops[1].className.includes('settings-button'),
+      `the Settings button is reachable with ${tabKey}\n    expected .settings-button\n    actual   ${format(stops[1])}`,
     );
     check(
       stops[2].className.includes('tool-card--image'),
@@ -706,29 +788,61 @@ async function checkKeyboard(browser, server) {
       `the audio card is reachable with ${tabKey}\n    expected .tool-card--audio\n    actual   ${format(stops[3])}`,
     );
 
-    for (const stop of [stops[2], stops[3]]) {
+    for (const stop of [stops[1], stops[2], stops[3]]) {
       check(
         stop.outlineStyle === 'solid' && stop.outlineWidth >= 1,
-        `the focused card draws an outline\n    expected outline-style solid and outline-width >= 1px\n    actual   ${stop.outlineStyle}, ${stop.outlineWidth}px`,
+        `the focused ${stop.className} draws an outline\n    expected outline-style solid and outline-width >= 1px\n    actual   ${stop.outlineStyle}, ${stop.outlineWidth}px`,
       );
     }
 
+    // The dialog opens from the keyboard and keeps focus inside until Escape.
     await page.goto(server.url + HUB_ROUTE);
     await page.keyboard.press(tabKey);
     await page.keyboard.press(tabKey);
-    const themeFocus = await page.evaluate(() => {
-      const input = document.activeElement;
-      const label = input && input.id ? document.querySelector(`label[for="${input.id}"]`) : null;
-      const style = label ? getComputedStyle(label) : null;
-      return {
-        id: input?.id ?? null,
-        outlineStyle: style?.outlineStyle ?? null,
-        outlineWidth: style ? Number.parseFloat(style.outlineWidth) || 0 : 0,
-      };
-    });
+    assertEqual(
+      await page.evaluate(() => document.activeElement?.id ?? null),
+      'settings-open',
+      `the second ${tabKey} stop is the Settings button`,
+    );
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => document.getElementById('settings-dialog')?.open === true);
     check(
-      themeFocus.id?.startsWith('theme-') && themeFocus.outlineStyle === 'solid' && themeFocus.outlineWidth >= 1,
+      await page.evaluate(() => document.getElementById('settings-dialog').contains(document.activeElement)),
+      'opening Settings from the keyboard moves focus into the dialog',
+    );
+
+    let themeFocus = null;
+    for (let index = 0; index < 4; index += 1) {
+      themeFocus = await page.evaluate(() => {
+        const input = document.activeElement;
+        const label = input && input.id ? document.querySelector(`label[for="${input.id}"]`) : null;
+        const style = label ? getComputedStyle(label) : null;
+        return {
+          id: input?.id ?? null,
+          outlineStyle: style?.outlineStyle ?? null,
+          outlineWidth: style ? Number.parseFloat(style.outlineWidth) || 0 : 0,
+        };
+      });
+      if (themeFocus.id?.startsWith('theme-')) {
+        break;
+      }
+      await page.keyboard.press(tabKey);
+    }
+    check(
+      themeFocus?.id?.startsWith('theme-') && themeFocus.outlineStyle === 'solid' && themeFocus.outlineWidth >= 1,
       `the focused theme option draws an outline\n    expected a theme radio and outline-style solid with width >= 1px\n    actual   ${format(themeFocus)}`,
+    );
+    assertEqual(themeFocus.id, 'theme-system', 'the radio-group tab stop is the checked theme option');
+
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => document.getElementById('settings-dialog')?.open === false);
+    await page
+      .waitForFunction(() => document.activeElement?.id === 'settings-open', null, { timeout: 3000 })
+      .catch(() => {});
+    assertEqual(
+      await page.evaluate(() => document.activeElement?.id ?? null),
+      'settings-open',
+      'Escape returns focus to the Settings button',
     );
   });
 }
@@ -957,31 +1071,38 @@ async function checkAxe(server) {
           await page.goto(server.url + HUB_ROUTE);
           assertEqual(await themeOf(page), theme, `the axe run happens in the ${theme} theme`);
 
-          const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-          const counts = { violations: results.violations.length, serious: 0, critical: 0, moderate: 0, minor: 0 };
-          const violations = [];
+          const scan = async (dialogOpen) => {
+            const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
+            const counts = { violations: results.violations.length, serious: 0, critical: 0, moderate: 0, minor: 0 };
+            const violations = [];
+            const state = dialogOpen ? ' with Settings open' : '';
 
-          for (const violation of results.violations) {
-            if (violation.impact === 'serious') counts.serious += 1;
-            if (violation.impact === 'critical') counts.critical += 1;
-            if (violation.impact === 'moderate') counts.moderate += 1;
-            if (violation.impact === 'minor') counts.minor += 1;
+            for (const violation of results.violations) {
+              if (violation.impact === 'serious') counts.serious += 1;
+              if (violation.impact === 'critical') counts.critical += 1;
+              if (violation.impact === 'moderate') counts.moderate += 1;
+              if (violation.impact === 'minor') counts.minor += 1;
 
-            violations.push({
-              id: violation.id,
-              impact: violation.impact,
-              help: violation.help,
-              targets: violation.nodes.map((node) => node.target),
-            });
+              violations.push({
+                id: violation.id,
+                impact: violation.impact,
+                help: violation.help,
+                targets: violation.nodes.map((node) => node.target),
+              });
 
-            if (FAILING_IMPACTS.has(violation.impact)) {
-              failures.push(
-                `[${engineName}/${theme}] ${violation.id} (${violation.impact}): ${violation.help}\n    expected no ${violation.impact} violation\n    actual   ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`,
-              );
+              if (FAILING_IMPACTS.has(violation.impact)) {
+                failures.push(
+                  `[${engineName}/${theme}${state}] ${violation.id} (${violation.impact}): ${violation.help}\n    expected no ${violation.impact} violation\n    actual   ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`,
+                );
+              }
             }
-          }
 
-          runs.push({ engine: engineName, theme, counts, violations });
+            runs.push({ engine: engineName, theme, dialog: dialogOpen, counts, violations });
+          };
+
+          await scan(false);
+          await openSettings(page);
+          await scan(true);
         });
       }
     } finally {
@@ -1017,6 +1138,8 @@ async function checkCaptures(server) {
     const shots = [
       { file: 'desktop-light.png', viewport: DESKTOP, colorScheme: 'light', path: HUB_ROUTE },
       { file: 'desktop-dark.png', viewport: DESKTOP, colorScheme: 'dark', path: HUB_ROUTE },
+      { file: 'settings-light.png', viewport: DESKTOP, colorScheme: 'light', path: HUB_ROUTE, dialog: true },
+      { file: 'settings-dark.png', viewport: DESKTOP, colorScheme: 'dark', path: HUB_ROUTE, dialog: true },
       { file: 'mobile-light.png', viewport: MOBILE, colorScheme: 'light', path: HUB_ROUTE },
       { file: 'mobile-dark.png', viewport: MOBILE, colorScheme: 'dark', path: HUB_ROUTE },
       { file: 'mobile-320.png', viewport: { width: 320, height: MOBILE.height }, colorScheme: 'light', path: HUB_ROUTE },
@@ -1032,6 +1155,9 @@ async function checkCaptures(server) {
           const page = await context.newPage();
           await page.goto(server.url + shot.path);
           await page.locator('h1').waitFor();
+          if (shot.dialog) {
+            await openSettings(page);
+          }
           await page.screenshot({ path: join(CAPTURES, shot.file), fullPage: true });
         },
       );

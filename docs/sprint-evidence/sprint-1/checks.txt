@@ -1,15 +1,16 @@
 # Sprint 1 local checks
 
-Run from 2026-11-01T10:38:29Z to 2026-11-01T10:38:37Z.
+Run from 2026-11-01T10:50:59.264Z to 2026-11-01T10:51:08.033Z.524Z to 2026-11-01T10:50:01.164Z.
 Node: v22.11.0  npm: 10.9.0
 Playwright: 1.64.1  html-validate: 10.0.0  axe: 4.13.0
 
 The negative controls ran before the final clean run. That clean run restored `redirects.json`
 and `accessibility.json`, so both files match the result below, not a broken fixture.
 
-The final run came after the user asked to match the standard Settings style and font. Only
-tokens, radii, and card surfaces changed; no selector or behavior moved. The negative controls
-were rerun against copies of the updated public tree and still exit 1.
+The final run came after the user asked for a Settings button that opens a popup card with the
+dark mode selector. The inline theme control moved into a native dialog, the keyboard journey
+and axe scans were extended, and the Settings light and dark captures were added. The negative
+controls were rerun against copies of the updated public tree and still exit 1.
 
 ## HTML validation
 
@@ -31,10 +32,10 @@ PASS links (0.0s)
 PASS redirects (0.0s)
 PASS html (0.2s)
 PASS http (0.0s)
-PASS browser (6.5s)
-PASS axe (1.5s)
-PASS captures (0.6s)
-PASS all 7 groups in 8.7s
+PASS browser (6.4s)
+PASS axe (2.2s)
+PASS captures (0.7s)
+PASS all 7 groups in 9.5s
 exit=0
 
 ## Lockfile check
@@ -103,5 +104,5 @@ No test dependency, source map, or development file is present.
 ## Captures
 
 docs/sprint-evidence/sprint-1/captures/ now holds desktop-light.png, desktop-dark.png,
-tablet-768.png, mobile-light.png, mobile-dark.png, mobile-320.png, 404.png, and
-redirect-no-js.png.
+tablet-768.png, mobile-light.png, mobile-dark.png, mobile-320.png, settings-light.png,
+settings-dark.png, 404.png, and redirect-no-js.png.

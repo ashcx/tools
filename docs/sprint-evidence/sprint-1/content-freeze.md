@@ -11,7 +11,11 @@ short descriptor. That instruction supersedes the card copy below. The rendered 
 - Descriptor: Two browser-local tools for images and audio.
 - Image Compressor summary: Compress, convert, resize.
 - Audio Toolkit summary: Trim, process, export audio.
-- Theme labels: System, Light, Dark.
+- Settings trigger: a gear icon and `Settings`, top right.
+- Settings popup: `Settings`, `Close`, `Appearance`, `Theme`, the labels System, Light, and Dark,
+  and the hint `System follows your operating system's light or dark setting.`
+
+The theme selector lives only in the Settings popup. It is not inline in the header.
 
 The format, privacy, and caveat facts below stay in this record as the source of truth for the
 two tools. They are not rendered, and the contract and verification script no longer assert them.
@@ -36,8 +40,10 @@ Settings tokens and segmented Appearance control. Neither app was modified.
 
 Breakpoints: one column below 760px, two card columns at 760px and above. Stage width 700px,
 page padding 24px on desktop and 16px on mobile. Brand mark 64px on desktop and 56px on mobile.
-Theme option target 44 by 44 pixels. Radii are 10px for the theme control, 7px for its options,
-and 20px for tool cards, matching the Settings cards. The font stack is unchanged: Inter first,
+Theme option target 44 by 44 pixels. Radii are 10px for the Settings button, Close, and theme
+control, 7px for the theme options, 16px for the dialog card, and 20px for tool cards. The popup
+is a native `dialog` with a dimmed backdrop, centered at 420px, and it reuses the Settings card
+layout: title row, bordered card, segmented control, hint. The font stack is unchanged: Inter first,
 then the system sans stack. There is no external font request.
 
 ## Sources inspected

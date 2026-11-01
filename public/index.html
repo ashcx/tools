@@ -57,22 +57,43 @@
 
     function start() {
       var control = document.querySelector(".theme-control");
-      if (!control) {
-        return;
-      }
-      var current = document.getElementById("theme-" + stored);
-      if (current) {
-        current.checked = true;
-      }
-      control.addEventListener("change", function (event) {
-        var input = event.target;
-        if (!input || input.name !== "theme" || !input.checked) {
-          return;
+      var dialog = document.getElementById("settings-dialog");
+      var open = document.getElementById("settings-open");
+      var close = document.getElementById("settings-close");
+
+      if (control) {
+        var current = document.getElementById("theme-" + stored);
+        if (current) {
+          current.checked = true;
         }
-        stored = input.value;
-        paint(stored);
-        save(stored);
-      });
+        control.addEventListener("change", function (event) {
+          var input = event.target;
+          if (!input || input.name !== "theme" || !input.checked) {
+            return;
+          }
+          stored = input.value;
+          paint(stored);
+          save(stored);
+        });
+      }
+
+      if (dialog && open) {
+        open.addEventListener("click", function () {
+          if (!dialog.open) {
+            dialog.showModal();
+          }
+          open.setAttribute("aria-expanded", "true");
+        });
+        if (close) {
+          close.addEventListener("click", function () {
+            dialog.close();
+          });
+        }
+        dialog.addEventListener("close", function () {
+          open.setAttribute("aria-expanded", "false");
+          open.focus();
+        });
+      }
     }
 
     if (document.readyState === "loading") {
@@ -93,17 +114,13 @@
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap site-header__inner">
-    <fieldset class="theme-control">
-      <legend class="visually-hidden">Theme</legend>
-      <div class="theme-control__segments">
-        <input class="theme-control__input" type="radio" name="theme" id="theme-system" value="system" checked>
-        <label class="theme-control__option" for="theme-system">System</label>
-        <input class="theme-control__input" type="radio" name="theme" id="theme-light" value="light">
-        <label class="theme-control__option" for="theme-light">Light</label>
-        <input class="theme-control__input" type="radio" name="theme" id="theme-dark" value="dark">
-        <label class="theme-control__option" for="theme-dark">Dark</label>
-      </div>
-    </fieldset>
+    <button class="settings-button" type="button" id="settings-open" aria-haspopup="dialog" aria-controls="settings-dialog" aria-expanded="false">
+      <svg class="settings-button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="3.2"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+      </svg>
+      <span>Settings</span>
+    </button>
   </div>
 </header>
 <main id="main" tabindex="-1">
@@ -135,5 +152,29 @@
     </nav>
   </div>
 </main>
+<dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+  <div class="settings-dialog__head">
+    <h2 id="settings-title">Settings</h2>
+    <button class="settings-close" type="button" id="settings-close">Close</button>
+  </div>
+  <section class="settings-card" aria-labelledby="settings-appearance">
+    <h3 id="settings-appearance">Appearance</h3>
+    <div class="settings-field">
+      <span class="settings-field__label">Theme</span>
+      <fieldset class="theme-control">
+        <legend class="visually-hidden">Theme</legend>
+        <div class="theme-control__segments">
+          <input class="theme-control__input" type="radio" name="theme" id="theme-system" value="system" checked>
+          <label class="theme-control__option" for="theme-system">System</label>
+          <input class="theme-control__input" type="radio" name="theme" id="theme-light" value="light">
+          <label class="theme-control__option" for="theme-light">Light</label>
+          <input class="theme-control__input" type="radio" name="theme" id="theme-dark" value="dark">
+          <label class="theme-control__option" for="theme-dark">Dark</label>
+        </div>
+      </fieldset>
+      <span class="settings-field__hint">System follows your operating system's light or dark setting.</span>
+    </div>
+  </section>
+</dialog>
 </body>
 </html>

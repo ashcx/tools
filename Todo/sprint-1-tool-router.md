@@ -479,3 +479,19 @@ Status: implemented and reverified; PR branch updated.
 - The 404 page, both alias fallbacks, and the favicon were moved to the same tokens.
 - `npm run validate` exit 0; `npm test` seven groups in 8.7s, exit 0; three negative controls
   exit 1. Captures and `accessibility.json` were written again.
+
+### 2026-11-01 — Settings popup
+
+Status: implemented and reverified; PR branch updated.
+
+- The user rejected the inline theme control: they want a Settings button on the page that opens
+  a popup card with the dark mode selector, following Image Compressor v1.
+- The header now holds a gear-and-label `Settings` button. It opens a native `dialog` centered
+  over a dimmed backdrop, holding the Appearance card, Theme label, segmented System/Light/Dark
+  control, and the System hint. Close and Escape dismiss it and restore focus to the button.
+- The dialog uses the same tokens, radii, typography, and segmented control as the apps. Neither
+  app was edited.
+- `checkLayout`, `checkTheme`, `checkKeyboard`, `checkAxe`, and `checkCaptures` were updated.
+  Axe now runs eight scans, including the popup open in both themes on both engines.
+- `npm run validate` exit 0; `npm test` seven groups in 9.5s, exit 0; three negative controls
+  exit 1. New captures: `settings-light.png` and `settings-dark.png`.

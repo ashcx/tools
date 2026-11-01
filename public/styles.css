@@ -128,19 +128,141 @@ main {
   justify-content: flex-end;
 }
 
-/* Appearance control, matching the apps' standard Settings page. */
-.theme-control {
-  position: relative;
+.settings-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color var(--ease), border-color var(--ease);
+}
+
+.settings-button:hover {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+.settings-button:focus-visible {
+  outline: 2px solid var(--success);
+  outline-offset: 2px;
+}
+
+.settings-button__icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* Settings popup, following the apps' Appearance card. */
+.settings-dialog {
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.22);
+}
+
+.settings-dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.settings-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-dialog__head h2 {
+  font-size: 1.15rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.settings-close {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color var(--ease), border-color var(--ease);
+}
+
+.settings-close:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-muted);
+}
+
+.settings-close:focus-visible {
+  outline: 2px solid var(--success);
+  outline-offset: 2px;
+}
+
+.settings-card {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-subtle);
+}
+
+.settings-card h3 {
   margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.settings-field {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.settings-field__label {
+  color: var(--muted-strong);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.settings-field__hint {
+  color: var(--muted-strong);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.theme-control {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.theme-control__segments {
+  display: inline-flex;
+  gap: 3px;
   padding: 3px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-muted);
-}
-
-.theme-control__segments {
-  display: flex;
-  gap: 3px;
 }
 
 .theme-control__input {
@@ -329,6 +451,10 @@ main {
 
   .theme-control__option {
     padding: 0 11px;
+  }
+
+  .settings-dialog {
+    padding: 20px;
   }
 }
 
