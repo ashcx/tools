@@ -465,3 +465,17 @@ Status: review complete with findings resolved; PR pending.
 - CI run https://github.com/ashcx/tools/actions/runs/41294114960 passed on `df83209`.
 - Pages is enabled with `build_type=workflow`. The Pages run follows the merge and is NOT
   VERIFIED. The live URL, status codes, and Audio Toolkit return link remain NOT VERIFIED.
+
+### 2026-11-01 — Settings style alignment
+
+Status: implemented and reverified; PR branch updated.
+
+- The user asked to keep the standard Settings pages in `image-compressor-v1` and
+  `audio-toolkit-v1` and to match their style and font. Neither app was edited.
+- The hub now uses the Image Compressor Settings tokens: `#f5f4f1` page, white surfaces, the
+  same borders, text, muted pair, 10px control radius, and 20px cards. The theme control copies
+  the Settings segmented Appearance control, including the 44px target and 680 weight. The font
+  stack already matched and did not change.
+- The 404 page, both alias fallbacks, and the favicon were moved to the same tokens.
+- `npm run validate` exit 0; `npm test` seven groups in 8.7s, exit 0; three negative controls
+  exit 1. Captures and `accessibility.json` were written again.

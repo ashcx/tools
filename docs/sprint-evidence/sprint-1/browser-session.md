@@ -45,3 +45,16 @@ is retained alongside the 1440, 390, and 320 captures.
 
 The in-app screenshot tool needs a visible desktop window and returned no image. Visual
 inspection used the retained Playwright captures instead.
+
+## 2026-11-01 style alignment recheck
+
+The user asked to keep the standard Settings pages in `image-compressor-v1` and
+`audio-toolkit-v1` and to match their style and font. Neither app was edited. The hub moved from
+the paper palette to the Image Compressor's Settings tokens and its segmented Appearance control.
+The font stack already matched and stayed the same. The 404 page and both alias fallbacks use the
+same updated tokens.
+
+A fresh `npm run validate` and `npm test` passed after the change (7 of 7 groups, 8.7s), the
+captures were written again, and the three negative controls still exit 1. The accessibility tree
+is unchanged. The newly captured light and dark pages show the segmented control, white Settings
+cards, the brand mark, one descriptor, and two tool links.

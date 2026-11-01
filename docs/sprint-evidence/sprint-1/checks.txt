@@ -1,11 +1,15 @@
 # Sprint 1 local checks
 
-Run from 2026-11-01T09:39:10Z to 2026-11-01T09:39:20Z.
+Run from 2026-11-01T10:38:29Z to 2026-11-01T10:38:37Z.
 Node: v22.11.0  npm: 10.9.0
 Playwright: 1.64.1  html-validate: 10.0.0  axe: 4.13.0
 
 The negative controls ran before the final clean run. That clean run restored `redirects.json`
 and `accessibility.json`, so both files match the result below, not a broken fixture.
+
+The final run came after the user asked to match the standard Settings style and font. Only
+tokens, radii, and card surfaces changed; no selector or behavior moved. The negative controls
+were rerun against copies of the updated public tree and still exit 1.
 
 ## HTML validation
 
@@ -27,10 +31,10 @@ PASS links (0.0s)
 PASS redirects (0.0s)
 PASS html (0.2s)
 PASS http (0.0s)
-PASS browser (6.4s)
+PASS browser (6.5s)
 PASS axe (1.5s)
 PASS captures (0.6s)
-PASS all 7 groups in 8.6s
+PASS all 7 groups in 8.7s
 exit=0
 
 ## Lockfile check

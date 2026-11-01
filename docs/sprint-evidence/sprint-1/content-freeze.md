@@ -16,25 +16,29 @@ short descriptor. That instruction supersedes the card copy below. The rendered 
 The format, privacy, and caveat facts below stay in this record as the source of truth for the
 two tools. They are not rendered, and the contract and verification script no longer assert them.
 
-## Visual tokens after the redesign
+## Visual tokens after the user review
 
-The hub started from the Image Compressor's warm neutral tokens and reset them to a quieter
-paper palette when the card lists were removed.
+The user asked to keep the standard Settings pages in `image-compressor-v1` and
+`audio-toolkit-v1` and to match their style and font. The hub now reuses the Image Compressor's
+Settings tokens and segmented Appearance control. Neither app was modified.
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Page background | `#f4f1ea` | `#121211` |
-| Surface | `#fbf9f4` | `#1c1b19` |
-| Border | `#ddd7c9` | `#2e2c28` |
-| Strong border | `#c9c2b1` | `#4a463f` |
-| Text | `#1c1a17` | `#f2efe8` |
-| Muted text | `#6d675d` | `#a19b90` |
+| Page background | `#f5f4f1` | `#131417` |
+| Surface | `#ffffff` | `#1c1e23` |
+| Subtle surface | `#faf9f7` | `#22252b` |
+| Muted surface | `#f0efeb` | `#2a2e35` |
+| Border | `#e4e1db` | `#333840` |
+| Strong border | `#d5d1c9` | `#454c57` |
+| Text | `#242321` | `#f1f2f4` |
+| Muted text | `#78756e` | `#9aa1ac` |
+| Muted strong | `#5e5b55` | `#c2c8d0` |
 
 Breakpoints: one column below 760px, two card columns at 760px and above. Stage width 700px,
 page padding 24px on desktop and 16px on mobile. Brand mark 64px on desktop and 56px on mobile.
-Theme option target 44 by 44 pixels. Radii are 12px for the theme control, 8px for its options,
-and 14px for tool cards. The font stack starts with Inter and falls back to the system sans
-stack. There is no external font request.
+Theme option target 44 by 44 pixels. Radii are 10px for the theme control, 7px for its options,
+and 20px for tool cards, matching the Settings cards. The font stack is unchanged: Inter first,
+then the system sans stack. There is no external font request.
 
 ## Sources inspected
 
