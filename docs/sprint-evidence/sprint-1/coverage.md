@@ -32,6 +32,7 @@ passed; deployment is pending.
 
 | Condition | State | Evidence |
 | --- | --- | --- |
+| Hub matches the standard Settings style and font of the two apps; neither app is modified | VERIFIED | user instruction 2026-11-01; `content-freeze.md` token table; `captures/desktop-light.png`; sibling worktrees show only the pre-existing navigation-handoff edits, no settings or style change |
 | No overflow at 320, 390, 768, 1440 and readable in light and dark | VERIFIED | `checkLayout` at all four widths in light and dark; `captures/mobile-320.png`; `captures/tablet-768.png` |
 | Cards stack below 760px and fit at the breakpoint | VERIFIED | `checkLayout` asserts stacked at 390 and 759, side by side at 768 and 1440 |
 | Focus visible and targets at least 44px | VERIFIED | `checkKeyboard` asserts outlines on the skip link, theme option, and both cards; `checkLayout` asserts 44 by 44 minimum on the skip link, theme options, and cards |
