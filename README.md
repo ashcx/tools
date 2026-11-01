@@ -1,4 +1,4 @@
-# Media Toolkit
+# [Media Toolkit](https://ashcx.github.io/tools/)
 
 A small static hub for two browser-local tools:
 
@@ -7,7 +7,7 @@ A small static hub for two browser-local tools:
 - [Audio Toolkit](https://ashcx.github.io/audio-toolkit-v1/) processes audio and video
   soundtracks with one ordered batch recipe.
 
-Live site: `https://ashcx.github.io/tools/` (deployment follows the merge).
+Live site: <https://ashcx.github.io/tools/> (deployment follows the merge).
 
 The GitHub repository must be named `tools` so GitHub Pages serves it at `/tools/`. The local
 folder is named `media-toolkit`; the brand is Media Toolkit. The name difference is intentional.
@@ -60,6 +60,26 @@ request. The only stored value is the theme choice in
 
 The hub does not process files and does not embed the apps. Each link opens the tool's own
 site, where processing stays on the device.
+
+## Add a future tool
+
+The current tools are separate deployments, reached through local alias pages. To add another
+one:
+
+1. Copy an existing alias to `public/<slug>/index.html`. Change the title, canonical URL,
+   `location.replace` target, `<noscript>` refresh, and the visible fallback link.
+2. Add a card to `nav.tool-grid` in `public/index.html`: an `a.tool-card[href="./<slug>/"]` with
+   `aria-labelledby` and `aria-describedby` pointing at its `h2` and short summary.
+3. Add the tool to `ALIASES` in `scripts/verify.mjs` (name, marker, route, file, card selector,
+   destination). That list drives the link allowlist and the redirect, browser, and no-JS
+   checks.
+4. Add the route to the `checkHttp` page list and to `recoveryLinks`. Add a matching recovery
+   link to `public/404.html`.
+5. Run `npm run validate` and `npm test`, then commit the refreshed evidence and captures.
+6. Merge to `main`; the Pages workflow deploys `public/`.
+
+A tool hosted inside this repository can live directly under `public/<slug>/` instead. Skip the
+alias file and the `ALIASES` checks, but still add the card, the 404 link, and the HTTP checks.
 
 ## Layout
 
