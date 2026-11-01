@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
 import { chromium, webkit } from 'playwright';
 import { startServer } from './serve.mjs';
+import { loadSites } from './sites.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const EVIDENCE = join(ROOT, 'docs/sprint-evidence/sprint-1');
@@ -18,24 +19,7 @@ const HUB_ROUTE = '/tools/';
 const DESKTOP = { width: 1440, height: 900 };
 const MOBILE = { width: 390, height: 844 };
 
-const ALIASES = [
-  {
-    name: 'Image Compressor',
-    marker: 'image',
-    route: '/tools/image-compressor/',
-    file: 'image-compressor/index.html',
-    card: '.tool-card--image',
-    destination: 'https://ashcx.github.io/image-compressor-v1/',
-  },
-  {
-    name: 'Audio Toolkit',
-    marker: 'audio',
-    route: '/tools/audio-toolkit/',
-    file: 'audio-toolkit/index.html',
-    card: '.tool-card--audio',
-    destination: 'https://ashcx.github.io/audio-toolkit-v1/',
-  },
-];
+const { hub, tools } = await loadSites();
 
 const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const FAILING_IMPACTS = new Set(['serious', 'critical']);
@@ -207,7 +191,7 @@ function artifactFileFor(artifactRoot, pathname) {
 }
 
 function isAllowedAbsoluteUrl(value) {
-  return ALIASES.some((alias) => value === alias.destination || value.startsWith(alias.destination));
+  return tools.some((alias) => value === alias.url || value.startsWith(alias.url));
 }
 
 async function checkLinks(artifactRoot) {
@@ -240,7 +224,7 @@ async function checkLinks(artifactRoot) {
         if (resolved.origin !== ARTIFACT_ORIGIN) {
           check(
             isAllowedAbsoluteUrl(resolved.href),
-            `<${tag.name} ${attribute}="${value}"> in ${pageLabel} is an absolute URL outside the allowlist\n    expected ${format(ALIASES.map((alias) => alias.destination))}\n    actual   ${format(resolved.href)}`,
+            `<${tag.name} ${attribute}="${value}"> in ${pageLabel} is an absolute URL outside the allowlist\n    expected ${format(tools.map((alias) => alias.url))}\n    actual   ${format(resolved.href)}`,
           );
           continue;
         }
@@ -272,7 +256,7 @@ async function checkRedirects(artifactRoot) {
   const report = { checkedAt: new Date().toISOString(), aliases: [] };
   const failures = [];
 
-  for (const alias of ALIASES) {
+  for (const alias of tools) {
     const html = await readFile(join(artifactRoot, alias.file), 'utf8');
     const facts = parseAlias(html);
     const assertions = {};
@@ -290,16 +274,16 @@ async function checkRedirects(artifactRoot) {
     );
     record(
       'canonical',
-      facts.canonical.length === 1 && facts.canonical[0] === alias.destination,
-      [alias.destination],
+      facts.canonical.length === 1 && facts.canonical[0] === alias.url,
+      [alias.url],
       facts.canonical,
     );
-    record('locationReplace', facts.replace === alias.destination, alias.destination, facts.replace);
-    record('noscriptRefresh', facts.refreshUrl === alias.destination, alias.destination, facts.refresh);
+    record('locationReplace', facts.replace === alias.url, alias.url, facts.replace);
+    record('noscriptRefresh', facts.refreshUrl === alias.url, alias.url, facts.refresh);
     record(
       'visibleAnchor',
-      facts.anchors.some((anchor) => anchor.href === alias.destination && anchor.text !== ''),
-      `a visible anchor to ${alias.destination}`,
+      facts.anchors.some((anchor) => anchor.href === alias.url && anchor.text !== ''),
+      `a visible anchor to ${alias.url}`,
       facts.anchors,
     );
     record(
@@ -310,7 +294,7 @@ async function checkRedirects(artifactRoot) {
     );
     record('noLocalAssets', facts.localAssets.length === 0, [], facts.localAssets);
 
-    report.aliases.push({ route: alias.route, destination: alias.destination, assertions });
+    report.aliases.push({ route: alias.route, destination: alias.url, assertions });
 
     const failed = Object.entries(assertions).find(([, assertion]) => !assertion.pass);
     if (failed) {
@@ -366,11 +350,10 @@ async function fetchText(url) {
 
 async function checkHttp(server) {
   const pages = [
-    { path: '/tools/', type: 'text/html; charset=utf-8' },
+    { path: HUB_ROUTE, type: 'text/html; charset=utf-8' },
     { path: '/tools/styles.css', type: 'text/css; charset=utf-8' },
     { path: '/tools/favicon.svg', type: 'image/svg+xml' },
-    { path: '/tools/image-compressor/', type: 'text/html; charset=utf-8' },
-    { path: '/tools/audio-toolkit/', type: 'text/html; charset=utf-8' },
+    ...tools.map((tool) => ({ path: tool.route, type: 'text/html; charset=utf-8' })),
   ];
 
   for (const page of pages) {
@@ -379,7 +362,7 @@ async function checkHttp(server) {
     assertEqual(response.headers.get('content-type'), page.type, `content-type for ${page.path}`);
   }
 
-  for (const path of ['/tools', '/tools/image-compressor']) {
+  for (const path of ['/tools', ...tools.map((tool) => tool.route.slice(0, -1))]) {
     const response = await fetch(server.url + path, { redirect: 'manual' });
     assertEqual(response.status, 301, `status for ${path} without a trailing slash`);
     assertEqual(
@@ -389,7 +372,7 @@ async function checkHttp(server) {
     );
   }
 
-  const recoveryLinks = ['./', './image-compressor/', './audio-toolkit/'];
+  const recoveryLinks = ['./', ...tools.map((tool) => `./${tool.slug}/`)];
   for (const path of ['/tools/nope/', '/tools/deep/missing', '/elsewhere/']) {
     const { response, body } = await fetchText(server.url + path);
     assertEqual(response.status, 404, `status for a missing path ${path}`);
@@ -471,12 +454,8 @@ async function checkLayout(browser, server) {
     await page.goto(server.url + HUB_ROUTE);
 
     assertEqual(await page.locator('h1').count(), 1, 'the hub has exactly one h1');
-    assertEqual(await page.locator('h1').textContent(), 'Media Toolkit', 'the h1 names the brand');
-    assertEqual(
-      await page.locator('.brand__lede').textContent(),
-      'Two browser-local tools for images and audio.',
-      'the descriptor is one short line',
-    );
+    assertEqual(await page.locator('h1').textContent(), hub.title, 'the h1 names the brand');
+    assertEqual(await page.locator('.brand__lede').textContent(), hub.lede, 'the descriptor is one short line');
     assertEqual(await page.locator('header a').count(), 0, 'the header has no brand link');
     assertEqual(await page.locator('header .settings-button').count(), 1, 'the header holds the Settings button');
     assertEqual(await page.locator('header .theme-control').count(), 0, 'the theme control is not inline in the header');
@@ -498,18 +477,18 @@ async function checkLayout(browser, server) {
       0,
       'the page has no footer, fact list, or call to action',
     );
-    assertEqual(await page.locator('h2').count(), 3, 'the page has three h2: the two cards and Settings');
-    assertEqual(await page.locator('.tool-card').count(), 2, 'the hub has exactly two cards');
-    assertEqual(await page.locator('.tool-card h2').count(), 2, 'both h2 sit inside the cards');
+    assertEqual(await page.locator('h2').count(), tools.length + 1, 'the page has one h2 per card plus Settings');
+    assertEqual(await page.locator('.tool-card').count(), tools.length, 'the hub has one card per tool');
+    assertEqual(await page.locator('.tool-card h2').count(), tools.length, 'every h2 sits inside a card');
     assertDeepEqual(
       await page.locator('.tool-card h2').allTextContents(),
-      ['Image Compressor', 'Audio Toolkit'],
-      'the card headings are Image Compressor and Audio Toolkit',
+      tools.map((tool) => tool.name),
+      'the card headings follow sites.yml order',
     );
     assertEqual(
       await page.locator('.tool-card__arrow[aria-hidden="true"]').count(),
-      2,
-      'both tool arrows are hidden from assistive technology',
+      tools.length,
+      'every tool arrow is hidden from assistive technology',
     );
     assertEqual(
       await page
@@ -519,7 +498,7 @@ async function checkLayout(browser, server) {
       'the cards contain no nested interactive elements',
     );
 
-    for (const alias of ALIASES) {
+    for (const alias of tools) {
       const card = page.locator(alias.card);
       const labelledBy = await card.getAttribute('aria-labelledby');
       const describedBy = await card.getAttribute('aria-describedby');
@@ -534,13 +513,13 @@ async function checkLayout(browser, server) {
     const cardHrefs = await page.locator('.tool-card').evaluateAll((cards) => cards.map((card) => card.href));
     assertDeepEqual(
       cardHrefs.map((href) => new URL(href).pathname),
-      ALIASES.map((alias) => alias.route),
+      tools.map((alias) => alias.route),
       'the card hrefs resolve to the alias routes',
     );
 
-    for (const alias of ALIASES) {
+    for (const alias of tools) {
       const facts = parseAlias((await fetchText(server.url + alias.route)).body);
-      assertDeepEqual(facts.canonical, [alias.destination], `the served alias ${alias.route} targets the live app`);
+      assertDeepEqual(facts.canonical, [alias.url], `the served alias ${alias.route} targets the live app`);
     }
 
     const targets = await page
@@ -593,17 +572,21 @@ async function checkLayout(browser, server) {
       [1440, false],
     ]) {
       await page.setViewportSize({ width, height: width < 760 ? MOBILE.height : DESKTOP.height });
-      const image = await page.locator('.tool-card--image').boundingBox();
-      const audio = await page.locator('.tool-card--audio').boundingBox();
+      const boxes = await page.locator('.tool-card').evaluateAll((cards) =>
+        cards.map((card) => {
+          const rect = card.getBoundingClientRect();
+          return { x: rect.x, y: rect.y };
+        }),
+      );
       if (stacked) {
         check(
-          audio.y > image.y + 1,
-          `the cards stack at ${width}\n    expected audio top > image top + 1\n    actual   image ${format(image.y)}, audio ${format(audio.y)}`,
+          boxes.every((box, index) => index === 0 || box.y > boxes[index - 1].y + 1),
+          `the cards stack at ${width}\n    expected every card below the one before it\n    actual   ${format(boxes)}`,
         );
-      } else {
+      } else if (tools.length > 1) {
         check(
-          Math.abs(image.y - audio.y) <= 1 && audio.x > image.x,
-          `the cards share a row at ${width}\n    expected the same top and audio left > image left\n    actual   image ${format(image)}, audio ${format(audio)}`,
+          Math.abs(boxes[0].y - boxes[1].y) <= 1 && boxes[1].x > boxes[0].x,
+          `the first two cards share a row at ${width}\n    expected the same top and a larger left\n    actual   ${format(boxes.slice(0, 2))}`,
         );
       }
     }
@@ -756,7 +739,7 @@ async function checkKeyboard(browser, server) {
 
     await page.goto(server.url + HUB_ROUTE);
     const stops = [];
-    for (let index = 0; index < 4; index += 1) {
+    for (let index = 0; index < tools.length + 2; index += 1) {
       await page.keyboard.press(tabKey);
       stops.push(
         await page.evaluate(() => {
@@ -779,16 +762,15 @@ async function checkKeyboard(browser, server) {
       stops[1].className.includes('settings-button'),
       `the Settings button is reachable with ${tabKey}\n    expected .settings-button\n    actual   ${format(stops[1])}`,
     );
-    check(
-      stops[2].className.includes('tool-card--image'),
-      `the image card is reachable with ${tabKey}\n    expected .tool-card--image\n    actual   ${format(stops[2])}`,
-    );
-    check(
-      stops[3].className.includes('tool-card--audio'),
-      `the audio card is reachable with ${tabKey}\n    expected .tool-card--audio\n    actual   ${format(stops[3])}`,
-    );
+    for (const [index, tool] of tools.entries()) {
+      const stop = stops[index + 2];
+      check(
+        stop.className.includes(`tool-card--${tool.slug}`),
+        `the ${tool.name} card is reachable with ${tabKey}\n    expected .tool-card--${tool.slug}\n    actual   ${format(stop)}`,
+      );
+    }
 
-    for (const stop of [stops[1], stops[2], stops[3]]) {
+    for (const stop of stops.slice(1)) {
       check(
         stop.outlineStyle === 'solid' && stop.outlineWidth >= 1,
         `the focused ${stop.className} draws an outline\n    expected outline-style solid and outline-width >= 1px\n    actual   ${stop.outlineStyle}, ${stop.outlineWidth}px`,
@@ -848,8 +830,8 @@ async function checkKeyboard(browser, server) {
 }
 
 async function interceptApps(context) {
-  for (const alias of ALIASES) {
-    await context.route(`${alias.destination}**`, (route) => route.fulfill(stubResponse(alias.marker)));
+  for (const alias of tools) {
+    await context.route(`${alias.url}**`, (route) => route.fulfill(stubResponse(alias.slug)));
   }
 }
 
@@ -857,29 +839,29 @@ async function checkAliasNavigation(browser, server) {
   await withContext(browser, { viewport: DESKTOP }, async (context) => {
     await interceptApps(context);
 
-    for (const alias of ALIASES) {
+    for (const alias of tools) {
       const page = await context.newPage();
       await page.goto(server.url + alias.route);
-      await page.waitForURL(alias.destination);
-      assertEqual(page.url(), alias.destination, `${alias.route} replaces location with the live app`);
+      await page.waitForURL(alias.url);
+      assertEqual(page.url(), alias.url, `${alias.route} replaces location with the live app`);
       assertEqual(
-        await page.locator(`[data-stub="${alias.marker}"]`).count(),
+        await page.locator(`[data-stub="${alias.slug}"]`).count(),
         1,
-        `${alias.route} loads the ${alias.marker} app document`,
+        `${alias.route} loads the ${alias.slug} app document`,
       );
       await page.close();
     }
 
-    for (const alias of ALIASES) {
+    for (const alias of tools) {
       const page = await context.newPage();
       await page.goto(server.url + HUB_ROUTE);
       await page.locator(alias.card).click();
-      await page.waitForURL(alias.destination);
-      assertEqual(page.url(), alias.destination, `clicking the ${alias.name} card reaches the live app`);
+      await page.waitForURL(alias.url);
+      assertEqual(page.url(), alias.url, `clicking the ${alias.name} card reaches the live app`);
       assertEqual(
-        await page.locator(`[data-stub="${alias.marker}"]`).count(),
+        await page.locator(`[data-stub="${alias.slug}"]`).count(),
         1,
-        `clicking the ${alias.name} card loads the ${alias.marker} app document`,
+        `clicking the ${alias.name} card loads the ${alias.slug} app document`,
       );
       await page.goBack();
       assertEqual(
@@ -898,26 +880,26 @@ async function checkAliasWithoutJavaScript(browser, server, engineName) {
     await interceptApps(context);
     const page = await context.newPage();
 
-    for (const alias of ALIASES) {
+    for (const alias of tools) {
       await page.goto(server.url + alias.route);
       try {
-        await page.waitForURL(alias.destination, { timeout: 10000 });
+        await page.waitForURL(alias.url, { timeout: 10000 });
       } catch {
         try {
-          await page.locator(`main a[href="${alias.destination}"]`).first().click({ timeout: 5000 });
-          await page.waitForURL(alias.destination, { timeout: 10000 });
+          await page.locator(`main a[href="${alias.url}"]`).first().click({ timeout: 5000 });
+          await page.waitForURL(alias.url, { timeout: 10000 });
           console.log(`NOTE browser: ${engineName} reached ${alias.route} through the visible fallback`);
         } catch {
           throw new CheckFailure(
-            `${alias.route} does not reach ${alias.destination} with JavaScript disabled\n    expected the noscript refresh or the visible fallback to navigate\n    actual   neither path reached the destination`,
+            `${alias.route} does not reach ${alias.url} with JavaScript disabled\n    expected the noscript refresh or the visible fallback to navigate\n    actual   neither path reached the destination`,
           );
         }
       }
-      assertEqual(page.url(), alias.destination, `${alias.route} reaches the live app with JavaScript disabled`);
+      assertEqual(page.url(), alias.url, `${alias.route} reaches the live app with JavaScript disabled`);
       assertEqual(
-        await page.locator(`[data-stub="${alias.marker}"]`).count(),
+        await page.locator(`[data-stub="${alias.slug}"]`).count(),
         1,
-        `${alias.route} loads the ${alias.marker} app document with JavaScript disabled`,
+        `${alias.route} loads the ${alias.slug} app document with JavaScript disabled`,
       );
     }
   } finally {
@@ -928,13 +910,19 @@ async function checkAliasWithoutJavaScript(browser, server, engineName) {
 async function checkAliasFallbackLayout(browser, server) {
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: MOBILE.height } });
   try {
-    for (const alias of ALIASES) {
-      await context.route(`${alias.destination}**`, (route) => route.fulfill({ status: 204, body: '' }));
+    for (const alias of tools) {
+      await context.route(`${alias.url}**`, (route) => route.fulfill({ status: 204, body: '' }));
     }
     const page = await context.newPage();
-    for (const alias of ALIASES) {
-      await page.goto(server.url + alias.route);
-      await page.locator('main h1').waitFor();
+    for (const alias of tools) {
+      // The 204 stub keeps the fallback document, but it also keeps a navigation pending, so wait only for the commit.
+      await page.goto(server.url + alias.route, { waitUntil: 'commit' });
+      await page.locator('main h1').waitFor({ state: 'attached' });
+      assertEqual(
+        await page.locator('main h1').textContent(),
+        alias.name,
+        `${alias.route} fallback names its tool`,
+      );
       const metrics = await page.evaluate(() => ({
         scrollWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
         clientWidth: document.documentElement.clientWidth,
@@ -957,8 +945,8 @@ async function checkNotFound(browser, server) {
     assertEqual(response.status(), 404, 'the browser sees status 404 for a missing path');
     assertDeepEqual(
       await page.locator('.links a').evaluateAll((anchors) => anchors.map((anchor) => anchor.href)),
-      [`${server.url}${HUB_ROUTE}`, `${server.url}${ALIASES[0].route}`, `${server.url}${ALIASES[1].route}`],
-      'the 404 page offers three recovery links that resolve to hub routes',
+      [`${server.url}${HUB_ROUTE}`, ...tools.map((tool) => `${server.url}${tool.route}`)],
+      `the 404 page offers ${tools.length + 1} recovery links that resolve to hub routes`,
     );
   });
 }
@@ -1009,7 +997,7 @@ async function checkBlockedStorage(browser, server) {
 
     await page.reload();
     assertEqual(await page.locator('h1').count(), 1, 'the hub still renders when storage throws');
-    assertEqual(await page.locator('.tool-card').count(), 2, 'both cards still render when storage throws');
+    assertEqual(await page.locator('.tool-card').count(), tools.length, 'every card still renders when storage throws');
     const theme = await themeOf(page);
     check(
       theme === 'light' || theme === 'dark',
@@ -1172,13 +1160,13 @@ async function checkCaptures(server) {
       { viewport: DESKTOP, colorScheme: 'light', javaScriptEnabled: false },
       async (context) => {
         // A 204 answer to the meta refresh keeps the fallback document visible instead of replacing it.
-        await context.route(`${ALIASES[0].destination}**`, (route) => route.fulfill({ status: 204, body: '' }));
+        await context.route(`${tools[0].url}**`, (route) => route.fulfill({ status: 204, body: '' }));
         const page = await context.newPage();
-        await page.goto(server.url + ALIASES[0].route);
-        await page.locator('main h1').waitFor();
+        await page.goto(server.url + tools[0].route, { waitUntil: 'commit' });
+        await page.locator('main h1').waitFor({ state: 'attached' });
         assertEqual(
           await page.locator('main h1').textContent(),
-          ALIASES[0].name,
+          tools[0].name,
           'the no-JavaScript capture shows the alias fallback page',
         );
         await page.screenshot({ path: join(CAPTURES, 'redirect-no-js.png'), fullPage: true });

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Media Toolkit</title>
-<meta name="description" content="Two browser-local tools for images and audio.">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
 <script>
   (function () {
     var root = document.documentElement;
@@ -135,20 +135,11 @@
           <path d="M44 23v18"/>
         </g>
       </svg>
-      <h1 class="brand__name">Media Toolkit</h1>
-      <p class="brand__lede">Two browser-local tools for images and audio.</p>
+      <h1 class="brand__name">{{title}}</h1>
+      <p class="brand__lede">{{lede}}</p>
     </div>
     <nav class="tool-grid" aria-label="Tools">
-      <a class="tool-card tool-card--image" href="./image-compressor/" aria-labelledby="tool-image-title" aria-describedby="tool-image-summary">
-        <h2 class="tool-card__title" id="tool-image-title">Image Compressor</h2>
-        <p class="tool-card__lead" id="tool-image-summary">Compress, convert, resize</p>
-        <span class="tool-card__arrow" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3 8h10"/><path d="M9 4l4 4-4 4"/></svg></span>
-      </a>
-      <a class="tool-card tool-card--audio" href="./audio-toolkit/" aria-labelledby="tool-audio-title" aria-describedby="tool-audio-summary">
-        <h2 class="tool-card__title" id="tool-audio-title">Audio Toolkit</h2>
-        <p class="tool-card__lead" id="tool-audio-summary">Trim, process, export audio</p>
-        <span class="tool-card__arrow" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3 8h10"/><path d="M9 4l4 4-4 4"/></svg></span>
-      </a>
+{{tools}}
     </nav>
   </div>
 </main>

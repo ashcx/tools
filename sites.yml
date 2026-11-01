@@ -1,0 +1,16 @@
+# The hub is generated from this file. `npm run build` writes public/.
+# Add a tool by adding one entry under `tools`, then commit. Nothing else to edit.
+hub:
+  title: Media Toolkit
+  lede: Two browser-local tools for images and audio.
+
+tools:
+  - name: Image Compressor
+    slug: image-compressor
+    summary: Compress, convert, resize
+    url: https://ashcx.github.io/image-compressor-v1/
+
+  - name: Audio Toolkit
+    slug: audio-toolkit
+    summary: Trim, process, export audio
+    url: https://ashcx.github.io/audio-toolkit-v1/

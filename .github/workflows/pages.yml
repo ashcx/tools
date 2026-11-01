@@ -35,6 +35,9 @@ jobs:
       - name: Verify the hub
         run: npm test
 
+      - name: Build the site
+        run: npm run build
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3

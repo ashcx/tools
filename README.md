@@ -22,18 +22,20 @@ The hub is deliberately minimal:
 
 | Layer | Choice |
 | --- | --- |
-| Markup | Hand-written HTML5 |
+| Markup | Hand-written HTML5 templates, filled at build time |
 | Styling | Plain CSS: custom properties, grid, flexbox, media queries, light/dark tokens |
 | Behaviour | A few lines of vanilla JavaScript, inline: theme bootstrap before paint and `location.replace` on redirect aliases |
 | Framework | None |
-| Bundler / build step | None |
+| Bundler | None: `scripts/build.mjs` is a plain Node script that fills three HTML templates |
+| Config | `sites.yml`: the hub copy and the tool list |
 | Runtime dependencies | None |
 | Fonts / analytics / cookies | None |
 | Browser storage | `localStorage["media-toolkit-theme"]` only |
-| Verification (development only) | Node.js 22, Playwright (Chromium and WebKit), `@axe-core/playwright`, `html-validate` |
+| Verification (development only) | Node.js 22, `js-yaml` (build only), Playwright (Chromium and WebKit), `@axe-core/playwright`, `html-validate` |
 | CI / hosting | GitHub Actions plus GitHub Pages |
 
-`public/` is the complete deployed artifact. The test tooling never ships.
+`public/` is the deployed artifact. It is generated from `sites.yml` and `src/` and is not
+committed; CI builds it. The test tooling never ships.
 
 The two linked apps are separate Vite + TypeScript + Preact applications. They are not part of
 the hub build and are not modified by it.
@@ -53,46 +55,64 @@ summaries. It has no footer, fact lists, format lists, or privacy statements.
 Unknown paths return a 404 page with links to both tools. The alias pages use
 `location.replace` and a `<noscript>` meta refresh, so they work with or without JavaScript.
 
-The hub is plain HTML, CSS, and a tiny inline theme script. It has no framework, no build
-step, no runtime dependency, no external font, no analytics, no cookie, and no third-party
-request. The only stored value is the theme choice in
+The hub ships plain HTML, CSS, and a tiny inline theme script. The build only joins templates
+and config into static files, so the deployed page has no framework, no runtime dependency, no
+external font, no analytics, no cookie, and no third-party request. The only stored value is the theme choice in
 `localStorage["media-toolkit-theme"]`.
 
 The hub does not process files and does not embed the apps. Each link opens the tool's own
 site, where processing stays on the device.
 
-## Add a future tool
+## Add a tool
 
-The current tools are separate deployments, reached through local alias pages. To add another
-one:
+Add one entry under `tools` in `sites.yml`:
 
-1. Copy an existing alias to `public/<slug>/index.html`. Change the title, canonical URL,
-   `location.replace` target, `<noscript>` refresh, and the visible fallback link.
-2. Add a card to `nav.tool-grid` in `public/index.html`: an `a.tool-card[href="./<slug>/"]` with
-   `aria-labelledby` and `aria-describedby` pointing at its `h2` and short summary.
-3. Add the tool to `ALIASES` in `scripts/verify.mjs` (name, marker, route, file, card selector,
-   destination). That list drives the link allowlist and the redirect, browser, and no-JS
-   checks.
-4. Add the route to the `checkHttp` page list and to `recoveryLinks`. Add a matching recovery
-   link to `public/404.html`.
-5. Run `npm run validate` and `npm test`, then commit the refreshed evidence and captures.
-6. Merge to `main`; the Pages workflow deploys `public/`.
+```yaml
+  - name: Video Trimmer
+    slug: video-trimmer
+    summary: Cut and re-encode video clips
+    url: https://ashcx.github.io/video-trimmer-v1/
+```
 
-A tool hosted inside this repository can live directly under `public/<slug>/` instead. Skip the
-alias file and the `ALIASES` checks, but still add the card, the 404 link, and the HTTP checks.
+That is the whole change. `npm run build` regenerates the hub card, the
+`/tools/video-trimmer/` alias page, the 404 recovery link, and the verification
+allowlist from the same file. Update `hub.lede` when the sentence counts tools.
+
+| Field | Meaning |
+| --- | --- |
+| `name` | Card heading, alias page heading, and link text |
+| `slug` | Route segment and directory name: `/tools/<slug>/` |
+| `summary` | One short line under the card heading |
+| `url` | Destination the alias redirects to |
+
+Rules the build enforces: `name`, `slug`, `summary`, and `url` are required;
+`slug` is lowercase letters, digits, and single hyphens, and must be unique;
+`url` is an absolute `https:` URL. Every tool is a separate deployment, reached
+through its alias page.
+
+The same file holds the hub copy:
+
+| Field | Meaning |
+| --- | --- |
+| `hub.title` | Page title and brand heading |
+| `hub.lede` | The descriptor line under the brand |
+| `hub.description` | Optional meta description; defaults to `hub.lede` |
 
 ## Layout
 
 ```text
-public/                         deployed artifact
-  index.html                    hub
+sites.yml                       hub copy and tool list: the only file to edit
+src/                            inputs to the build
+  index.html                    hub template
+  alias.html                    redirect alias template
+  404.html                      recovery page template
   styles.css                    tokens, layout, themes
   favicon.svg
   .nojekyll
-  image-compressor/index.html   redirect alias
-  audio-toolkit/index.html      redirect alias
-  404.html                      recovery page
+public/                         generated artifact, not committed
 scripts/
+  build.mjs                     reads sites.yml, fills src/, writes public/
+  sites.mjs                     loads and validates sites.yml
   serve.mjs                     local server at /tools/
   verify.mjs                    link, redirect, browser, axe, and capture checks
 docs/sprint-evidence/sprint-1/  coverage, checks, captures, interrogate
@@ -109,11 +129,16 @@ npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:4173/tools/`.
+`npm run dev` builds `public/` and then serves it. Open
+`http://127.0.0.1:4173/tools/`. Run `npm run build` alone to check the output
+without starting the server.
 
 ```sh
 npm test
 ```
+
+`npm test` builds first, then verifies. It fails on an invalid `sites.yml`
+before any browser starts.
 
 The suite serves `public/` at the production base path and checks links, redirect contracts,
 HTTP status codes, Chromium and WebKit layouts, themes, keyboard navigation, the no-JavaScript
@@ -122,13 +147,13 @@ fallback, the 404 page, and axe accessibility. Screenshots are written to
 
 ## Deployment
 
-The public `ashcx/tools` repository deploys `public/` from `main` through
-`.github/workflows/pages.yml`. CI runs `npm test` on pull requests. Deployment requires a
+The public `ashcx/tools` repository builds `public/` from `main` and deploys it
+through `.github/workflows/pages.yml`. CI runs `npm test` on pull requests. Deployment requires a
 successful workflow run and a live check; local success alone is not deployment evidence.
 
 ## Verification
 
-`npm run validate` runs html-validate over the artifact. `npm test` accepts `--only` with any
+`npm run validate` builds and then runs html-validate over the artifact. `npm test` accepts `--only` with any
 of `links`, `redirects`, `html`, `http`, `browser`, `axe` and `captures`, and `--public <dir>` to
 run the same checks against another copy of the artifact.
 
