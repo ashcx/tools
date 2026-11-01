@@ -7,8 +7,8 @@ Media Toolkit is a static hub that routes visitors to two browser-local tools:
 - [Audio Toolkit](https://ashcx.github.io/audio-toolkit-v1/) — ordered batch recipes for
   extracting, trimming, processing, and exporting audio.
 
-Status: Sprint 1 implementation and local verification complete. Independent review pending. The
-PR is not created yet.
+Status: Sprint 1 implementation, local verification, and independent review complete. The PR is
+not created yet.
 
 Planned site: `https://ashcx.github.io/tools/` (not deployed; observed 404 on 2026-11-01).
 

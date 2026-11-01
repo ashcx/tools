@@ -1,11 +1,11 @@
 # Sprint 1 local checks
 
-Run from 2026-11-01T09:18:44Z to 2026-11-01T09:18:52Z.
+Run from 2026-11-01T09:39:10Z to 2026-11-01T09:39:20Z.
 Node: v22.11.0  npm: 10.9.0
 Playwright: 1.64.1  html-validate: 10.0.0  axe: 4.13.0
 
-The negative controls ran before the final clean run. The clean `npm test` after them restored the
-evidence files, so `redirects.json` and `accessibility.json` match this run, not a broken fixture.
+The negative controls ran before the final clean run. That clean run restored `redirects.json`
+and `accessibility.json`, so both files match the result below, not a broken fixture.
 
 ## HTML validation
 
@@ -27,10 +27,18 @@ PASS links (0.0s)
 PASS redirects (0.0s)
 PASS html (0.2s)
 PASS http (0.0s)
-PASS browser (5.2s)
+PASS browser (6.4s)
 PASS axe (1.5s)
-PASS captures (0.5s)
-PASS all 7 groups in 7.3s
+PASS captures (0.6s)
+PASS all 7 groups in 8.6s
+exit=0
+
+## Lockfile check
+
+$ npm ci --dry-run
+
+up to date in 185ms
+
 exit=0
 
 ## Negative control 1: wrong alias destination
@@ -54,9 +62,23 @@ The hub in /tmp/mt-neg-link contains <img src="https://tracker.example/pixel.png
 $ node scripts/verify.mjs --only links --public /tmp/mt-neg-link
 FAIL links (0.0s)
   <img src="https://tracker.example/pixel.png"> in index.html is an absolute URL outside the allowlist
-    expected ["https://ashcx.github.io/image-compressor-v1/","https://ashcx.github.io/audio-toolkit-v1/","https://github.com/ashcx/*"]
+    expected ["https://ashcx.github.io/image-compressor-v1/","https://ashcx.github.io/audio-toolkit-v1/"]
     actual   "https://tracker.example/pixel.png"
 FAIL 1 of 1 groups in 0.0s: links
+exit=1
+fixture removed: yes
+
+## Negative control 3: no-JavaScript alias with both paths broken
+
+The audio alias in /tmp/mt-neg-nojs has no noscript refresh, and its visible fallback points at
+https://example.com/audio/. The alias still has the correct canonical URL and location.replace.
+
+$ node scripts/verify.mjs --only browser --public /tmp/mt-neg-nojs
+FAIL browser (16.1s)
+  [chromium] alias without JavaScript: /tools/audio-toolkit/ does not reach https://ashcx.github.io/audio-toolkit-v1/ with JavaScript disabled
+    expected the noscript refresh or the visible fallback to navigate
+    actual   neither path reached the destination
+FAIL 1 of 1 groups in 16.1s: browser
 exit=1
 fixture removed: yes
 
@@ -73,3 +95,9 @@ public/index.html
 public/styles.css
 
 No test dependency, source map, or development file is present.
+
+## Captures
+
+docs/sprint-evidence/sprint-1/captures/ now holds desktop-light.png, desktop-dark.png,
+tablet-768.png, mobile-light.png, mobile-dark.png, mobile-320.png, 404.png, and
+redirect-no-js.png.

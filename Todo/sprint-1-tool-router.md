@@ -10,10 +10,10 @@ paths with a useful 404.
 Scope boundary: the hub only. The image and audio applications are read-only references. No
 audio code change is required; its header already targets `/tools/`.
 
-Status: **In progress**. Implementation and local verification complete. Independent review and
-PR pending. Deployment is not authorized yet.
+Status: **In progress**. Implementation, local verification, and independent review complete.
+The PR is pending. Deployment is not authorized yet.
 Technical delivery: Complete.
-Agent-verified acceptance: Local VERIFIED. Interrogate and live deployment NOT VERIFIED.
+Agent-verified acceptance: Local and interrogate VERIFIED. PR and live deployment NOT VERIFIED.
 
 ## Entry criteria
 
@@ -112,7 +112,7 @@ a task without evidence.
           axe scans in light and dark.
     - [x] Perform separate self-review, resolve findings, rerun affected checks, and log exact
           results.
-  - **Evidence:** `captures/` at all four widths; `accessibility.json`; `checks.txt`;
+  - **Evidence:** captures at 1440, 768, 390, and 320; `accessibility.json`; `checks.txt`;
     `coverage.md`.
 
 - [x] **S1-US03 — Route aliases and recover unknown paths** (P0, 1 SP; owner: main instance;
@@ -135,7 +135,7 @@ a task without evidence.
     - [x] Add route-contract checks that assert every required element and target.
     - [x] Perform separate self-review, resolve findings, rerun affected checks, and log exact
           results.
-  - **Evidence:** `redirects.json`; `404.txt`; `captures/404.png`;
+  - **Evidence:** `redirects.json`; `captures/404.png`;
     `captures/redirect-no-js.png`; `checks.txt`; `coverage.md`.
 
 - [x] **S1-US04 — Build the local Pages-parity server and automated verification** (P0, 2 SP;
@@ -226,11 +226,13 @@ last-resort exception permits a PR with unfinished work disclosed.
 
 Independent acceptance gates:
 
-- [ ] Interrogate is complete against the integrated sprint and the full Ready/Done matrix.
-      Two independent read-only `ds-juror` reviewers at
-      `opencode/deepseek-v4.1-flash-free#max` cover correctness/contracts/data safety and
-      user-journey/coverage/maintainability. Reviewer identities, model, revisions, findings,
-      reproductions, fixes, reruns, and verdict are recorded in `interrogate.md`.
+- [x] Interrogate is complete against the integrated sprint and the full Ready/Done matrix.
+      Two independent read-only reviewers covered correctness/contracts/data safety and
+      user-journey/coverage/maintainability. The configured
+      `opencode/deepseek-v4.1-flash-free#max` route was unavailable, so both ran on the
+      inherited `deepseek-flash` route at default effort, in separate contexts. Reviewer
+      identities, route, effort, revisions, findings, reproductions, fixes, reruns, and verdict
+      are recorded in `interrogate.md`.
 - [ ] Required real-world evidence exists: live URL, status codes, workflow run, and
       desktop/mobile captures. Unavailable evidence is explicitly NOT VERIFIED.
 - [ ] The Audio Toolkit return link to `/tools/` is verified live, or recorded as an external
@@ -398,7 +400,8 @@ Status: implementation and local verification complete; independent review and P
 Resume point:
 
 - A prior run implemented US01 through US05 up to local verification, then stopped after the
-  negative controls. It left `checks.txt` from 07:35Z and evidence JSON from 07:37Z.
+  negative controls when the session hit rate limits. It left `checks.txt` from 07:35Z and
+  evidence JSON from 07:37Z.
 - The committed `redirects.json` still held the broken negative-control values. The working
   tree had two later evidence files. The code and suite passed before the redesign.
 
@@ -423,3 +426,32 @@ Evidence: `docs/sprint-evidence/sprint-1/` (`contract.md`, `content-freeze.md`,
 `redirects.json`).
 
 Next: independent review, then the PR.
+
+### 2026-11-01 — Independent review and fixes
+
+Status: review complete with findings resolved; PR pending.
+
+- The configured `opencode/deepseek-v4.1-flash-free#max` route was unavailable. Subagent calls
+  with an explicit provider, model, or max effort failed. Two reviewers ran on the inherited
+  `deepseek-flash` route at default effort in separate worktrees. They reviewed the same intent
+  and scope against 8a2f784.
+- Reviewer A (correctness) passed with one medium and two low findings. Reviewer B
+  (journey/coverage) passed with one high process risk, two medium, and several low findings.
+- Fixed: the no-JS alias check now clicks the visible fallback and fails when both paths break;
+  the alias fallback pages use border-box and are checked at 320; blocked storage tests reads
+  and writes; the GitHub allowlist is gone; Light, 768, focus, target size, and history checks
+  were added; the 404 arrows are hidden from assistive technology; stale docs were corrected.
+- Reviewer B's `redirects.json` showed example.com because its negative control wrote the
+  failed report into the evidence path. The source alias was correct. The clean rerun restored
+  the evidence, and the clean-run order is recorded in `checks.txt`.
+- Rerun: `npm run validate` exit 0; `npm test` seven groups in 8.6s, exit 0; three negative
+  controls exit 1 with expected and actual output. See `checks.txt`.
+- Delivery: remote `main` will hold the planning commit `9100bee`; the PR head is this branch.
+  Pushing local `main` would deploy before the PR, so the delivery uses an explicit base ref.
+
+### 2026-11-01 — Retrospective
+
+- Run the negative controls before the final clean run. They write evidence files, and the
+  broken `redirects.json` from the prior run came from skipping that order.
+- Make a check that can skip into a check that can fail. The no-JS journey now falls back to
+  the visible link and throws when neither path works.

@@ -12,7 +12,7 @@ against one shape. Updated on 2026-11-01 after the user directed a minimal landi
 | `GET /tools/favicon.svg` | `200`, `image/svg+xml` |
 | `GET /tools/image-compressor/` | `200`, `public/image-compressor/index.html` |
 | `GET /tools/audio-toolkit/` | `200`, `public/audio-toolkit/index.html` |
-| anything else under `/tools/` | `404`, `public/404.html` |
+| an unknown path under `/tools/` that does not map to an artifact file | `404`, `public/404.html` |
 | outside `/tools/` | `404`, `public/404.html` |
 
 ## Hub DOM contract
@@ -98,7 +98,7 @@ No alias references a local stylesheet, script or image file.
 
 ## Verification hooks
 
-`scripts/verify.mjs` asserts the selectors, text, and keyboard order above. It serves `public/`
-itself at `/tools/` and never depends on the live network: the two external app origins are
-intercepted and answered with a stub page that contains `data-stub="image"` or
-`data-stub="audio"`.
+`scripts/verify.mjs` asserts the routes, hub DOM structure, alias contract, keyboard order,
+layout, theme behaviour, and accessibility checks above. It serves `public/` itself at
+`/tools/` and never depends on the live network: the two external app origins are intercepted
+and answered with a stub page that contains `data-stub="image"` or `data-stub="audio"`.

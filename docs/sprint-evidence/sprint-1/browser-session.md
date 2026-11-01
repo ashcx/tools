@@ -32,12 +32,16 @@ summary. The arrow is decorative and hidden from the accessibility tree.
 
 The deterministic suite covers the rest and ran after the redesign:
 
-- `checks.txt` browser group: theme persistence, keyboard order, alias navigation with and
-  without JavaScript, 404, local-only requests, reduced motion, and blocked storage in Chromium
+- `checks.txt` browser group: all three theme choices, keyboard order and focus rings, target
+  sizes, alias navigation with and without JavaScript, the 320px alias fallback, alias history,
+  the 404, local-only requests, reduced motion, and blocked storage reads and writes in Chromium
   and WebKit.
 - `accessibility.json`: four axe runs, zero violations at any impact.
 - `redirects.json`: every alias assertion passes.
 - Request list: `/tools/` and `/tools/styles.css` only on a hub load. No third-party request.
+
+The 404 recovery arrows are decorative and hidden from the accessibility tree. The 768 capture
+is retained alongside the 1440, 390, and 320 captures.
 
 The in-app screenshot tool needs a visible desktop window and returned no image. Visual
 inspection used the retained Playwright captures instead.

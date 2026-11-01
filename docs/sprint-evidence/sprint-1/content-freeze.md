@@ -33,7 +33,8 @@ paper palette when the card lists were removed.
 Breakpoints: one column below 760px, two card columns at 760px and above. Stage width 700px,
 page padding 24px on desktop and 16px on mobile. Brand mark 64px on desktop and 56px on mobile.
 Theme option target 44 by 44 pixels. Radii are 12px for the theme control, 8px for its options,
-and 14px for tool cards. The font stack is the system sans stack, with no external font.
+and 14px for tool cards. The font stack starts with Inter and falls back to the system sans
+stack. There is no external font request.
 
 ## Sources inspected
 
@@ -79,8 +80,9 @@ speed-first; the hub does not repeat that as a superlative.
 - Privacy: media is processed locally and files are not uploaded.
 - Caveat: isolation can take minutes and results vary; Firefox is unsupported.
 
-The audio README does not state a Firefox limitation. The caveat above is dropped until a
-source records it, and the card instead says that browser support varies for some codecs.
+The audio README does not state a Firefox limitation. The caveat above was dropped until a
+source recorded it. The superseded card copy said that browser support varies for some codecs;
+the rendered page no longer carries that caveat.
 
 ## Corrections applied after inspection
 

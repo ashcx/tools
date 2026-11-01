@@ -12,8 +12,8 @@ Live site: `https://ashcx.github.io/tools/` (deployment follows the merge).
 The GitHub repository must be named `tools` so GitHub Pages serves it at `/tools/`. The local
 folder is named `media-toolkit`; the brand is Media Toolkit. The name difference is intentional.
 
-Status: Sprint 1 implementation complete and locally verified. Independent review and the sprint
-PR are in progress. CI runs on the PR; deployment and live checks follow the merge.
+Status: Sprint 1 implementation, local verification, and independent review are complete. The
+sprint PR is pending. CI runs on the PR; deployment and live checks follow the merge.
 
 ## Stack
 
@@ -74,7 +74,7 @@ public/                         deployed artifact
 scripts/
   serve.mjs                     local server at /tools/
   verify.mjs                    link, redirect, browser, axe, and capture checks
-docs/sprint-evidence/sprint-1/  coverage, checks, captures, live results, interrogate
+docs/sprint-evidence/sprint-1/  coverage, checks, captures, interrogate
 Todo/                           roadmap, orchestration, Scrum policy, sprint plan
 ```
 
