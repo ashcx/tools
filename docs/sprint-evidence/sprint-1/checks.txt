@@ -1,8 +1,13 @@
 # Sprint 1 local checks
 
-Run at: 2026-11-01T07:35:25Z
+Run from 2026-11-01T09:18:44Z to 2026-11-01T09:18:52Z.
 Node: v22.11.0  npm: 10.9.0
 Playwright: 1.64.1  html-validate: 10.0.0  axe: 4.13.0
+
+The negative controls ran before the final clean run. The clean `npm test` after them restored the
+evidence files, so `redirects.json` and `accessibility.json` match this run, not a broken fixture.
+
+## HTML validation
 
 $ npm run validate
 
@@ -11,26 +16,27 @@ $ npm run validate
 
 exit=0
 
+## Full suite
+
 $ npm test
+
+> media-toolkit-hub@1.0.0 test
+> node scripts/verify.mjs
+
 PASS links (0.0s)
 PASS redirects (0.0s)
 PASS html (0.2s)
 PASS http (0.0s)
-PASS browser (5.7s)
+PASS browser (5.2s)
 PASS axe (1.5s)
-PASS captures (0.7s)
-PASS all 7 groups in 8.0s
+PASS captures (0.5s)
+PASS all 7 groups in 7.3s
 exit=0
 
-$ node scripts/verify.mjs --only links,redirects,html,http
-PASS links (0.0s)
-PASS redirects (0.0s)
-PASS html (0.2s)
-PASS http (0.0s)
-PASS all 4 groups in 0.2s
-exit=0
+## Negative control 1: wrong alias destination
 
-Negative control 1: wrong alias destination
+The audio alias in /tmp/mt-neg-alias points at https://example.com/audio/ instead of the live app.
+
 $ node scripts/verify.mjs --only redirects --public /tmp/mt-neg-alias
 FAIL redirects (0.0s)
   1 alias assertion(s) failed
@@ -41,7 +47,10 @@ FAIL 1 of 1 groups in 0.0s: redirects
 exit=1
 fixture removed: yes
 
-Negative control 2: third-party request in the hub
+## Negative control 2: third-party request in the hub
+
+The hub in /tmp/mt-neg-link contains <img src="https://tracker.example/pixel.png">.
+
 $ node scripts/verify.mjs --only links --public /tmp/mt-neg-link
 FAIL links (0.0s)
   <img src="https://tracker.example/pixel.png"> in index.html is an absolute URL outside the allowlist
@@ -50,3 +59,17 @@ FAIL links (0.0s)
 FAIL 1 of 1 groups in 0.0s: links
 exit=1
 fixture removed: yes
+
+## Deployed artifact
+
+The artifact is the contents of public/ only.
+
+public/.nojekyll
+public/404.html
+public/audio-toolkit/index.html
+public/favicon.svg
+public/image-compressor/index.html
+public/index.html
+public/styles.css
+
+No test dependency, source map, or development file is present.

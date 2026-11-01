@@ -2,18 +2,18 @@
 
 A small static hub for two browser-local tools:
 
-- [Image Compressor](https://ashcx.github.io/image-compressor-v1/) — compress, convert, and
-  resize images in batches.
-- [Audio Toolkit](https://ashcx.github.io/audio-toolkit-v1/) — process audio and video
+- [Image Compressor](https://ashcx.github.io/image-compressor-v1/) compresses, converts, and
+  resizes images in batches.
+- [Audio Toolkit](https://ashcx.github.io/audio-toolkit-v1/) processes audio and video
   soundtracks with one ordered batch recipe.
 
-Live site: `https://ashcx.github.io/tools/` (deployment pending the sprint pull request).
+Live site: `https://ashcx.github.io/tools/` (deployment follows the merge).
 
 The GitHub repository must be named `tools` so GitHub Pages serves it at `/tools/`. The local
 folder is named `media-toolkit`; the brand is Media Toolkit. The name difference is intentional.
 
-Status: Sprint 1 implementation complete and locally verified. CI, deployment, and live checks
-are pending the pull request.
+Status: Sprint 1 implementation complete and locally verified. Independent review and the sprint
+PR are in progress. CI runs on the PR; deployment and live checks follow the merge.
 
 ## Stack
 
@@ -39,12 +39,15 @@ the hub build and are not modified by it.
 
 ## What this site does
 
-The hub has two large tool cards. Each card routes through a local alias:
+The hub has two tool links. Each link routes through a local alias:
 
 | Hub path | Destination |
 | --- | --- |
 | `/tools/image-compressor/` | `https://ashcx.github.io/image-compressor-v1/` |
 | `/tools/audio-toolkit/` | `https://ashcx.github.io/audio-toolkit-v1/` |
+
+The page shows the brand mark, the name, one descriptor line, and the two links with short
+summaries. It has no footer, fact lists, format lists, or privacy statements.
 
 Unknown paths return a 404 page with links to both tools. The alias pages use
 `location.replace` and a `<noscript>` meta refresh, so they work with or without JavaScript.
@@ -54,7 +57,7 @@ step, no runtime dependency, no external font, no analytics, no cookie, and no t
 request. The only stored value is the theme choice in
 `localStorage["media-toolkit-theme"]`.
 
-The hub does not process files and does not embed the apps. Each card opens the tool's own
+The hub does not process files and does not embed the apps. Each link opens the tool's own
 site, where processing stays on the device.
 
 ## Layout

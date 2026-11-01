@@ -2,6 +2,39 @@
 
 Frozen on 2026-11-01 before any hub markup was written.
 
+## User-directed reduction on 2026-11-01
+
+The user called the first landing page text-heavy and asked for a logo, the tool name, and one
+short descriptor. That instruction supersedes the card copy below. The rendered page now shows:
+
+- Brand: Media Toolkit.
+- Descriptor: Two browser-local tools for images and audio.
+- Image Compressor summary: Compress, convert, resize.
+- Audio Toolkit summary: Trim, process, export audio.
+- Theme labels: System, Light, Dark.
+
+The format, privacy, and caveat facts below stay in this record as the source of truth for the
+two tools. They are not rendered, and the contract and verification script no longer assert them.
+
+## Visual tokens after the redesign
+
+The hub started from the Image Compressor's warm neutral tokens and reset them to a quieter
+paper palette when the card lists were removed.
+
+| Token | Light | Dark |
+| --- | --- | --- |
+| Page background | `#f4f1ea` | `#121211` |
+| Surface | `#fbf9f4` | `#1c1b19` |
+| Border | `#ddd7c9` | `#2e2c28` |
+| Strong border | `#c9c2b1` | `#4a463f` |
+| Text | `#1c1a17` | `#f2efe8` |
+| Muted text | `#6d675d` | `#a19b90` |
+
+Breakpoints: one column below 760px, two card columns at 760px and above. Stage width 700px,
+page padding 24px on desktop and 16px on mobile. Brand mark 64px on desktop and 56px on mobile.
+Theme option target 44 by 44 pixels. Radii are 12px for the theme control, 8px for its options,
+and 14px for tool cards. The font stack is the system sans stack, with no external font.
+
 ## Sources inspected
 
 | Source | Revision | Inspected |

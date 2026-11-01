@@ -1,45 +1,43 @@
-# In-app browser session
+# Browser and capture session
 
-Run on 2026-11-01 against the local Pages-parity server at `http://127.0.0.1:4173/tools/`.
+## 2026-11-01 first session, superseded design
 
-## Hub load
+The first in-app browser session ran against `http://127.0.0.1:4173/tools/` with the large card
+design. It recorded the theme toggle, the two card destinations, the 404 recovery links, and the
+absence of third-party requests. The theme, alias, and 404 findings still hold because those
+files kept their behaviour. Its card copy and contentinfo observations no longer describe the
+page.
 
-- URL `http://127.0.0.1:4173/tools/`, title `Media Toolkit`, no console errors.
-- Requests captured: `/tools/` and `/tools/styles.css` only. No third-party request.
-- Accessibility tree: skip link first, `banner`, theme group named `Theme` with System,
-  Light and Dark radios, `main`, one `h1`, region `Tools` with two links, `contentinfo`.
-- Card link names: `Image Compressor` and `Audio Toolkit`, each described by its one-line
-  summary. Before this session the name was the whole card text, which read as a paragraph;
-  `aria-labelledby` and `aria-describedby` were added and the tree rechecked.
+## 2026-11-01 redesign recheck
 
-## Theme
+The user directed a minimal page: logo, name, one descriptor, and two tool links. The rewrite
+removed the hero paragraph, card fact lists, calls to action, and footer.
 
-- System scheme on this machine is dark. With no stored value the page resolved
-  `data-theme="dark"` and body background `rgb(19, 20, 23)`.
-- Selecting Dark through `label[for="theme-dark"]` set `data-theme="dark"`,
-  `localStorage["media-toolkit-theme"]="dark"`, and survived a reload.
-- Clicking the radio input directly is not possible here because it is clipped to 1px and the
-  label is the hit target. This is the same interaction the Playwright suite performs.
+Visual inspection used the Playwright captures written by `npm test` at 1440 by 900, 390 by 844,
+and 320 by 844, in light and dark. The page shows the brand mark, `Media Toolkit`, one descriptor
+line, and two bordered cards. The only chrome is the System, Light, and Dark control at the top
+right. The cards stack below 760px and stay inside the gutters at 320px. The 404 page and the
+alias fallback use the same palette.
 
-## Card destinations
+The accessibility tree from the current markup is:
 
-- Image Compressor card, clicked in the browser: final URL
-  `https://ashcx.github.io/image-compressor-v1/`, title `Image Compressor`, no console errors.
-- Back returned straight to `http://127.0.0.1:4173/tools/`, which confirms the alias did not
-  leave an entry in history.
-- Audio Toolkit card, clicked in the browser: final URL
-  `https://ashcx.github.io/audio-toolkit-v1/`, title `Audio Toolkit · Tools`, no console errors.
+- Skip link first.
+- `banner` with a `Theme` group holding System, Light, and Dark radios.
+- `main` with one `h1`.
+- Navigation region `Tools` with two links.
+- No `contentinfo` region, because the footer is gone.
 
-## 404
+Card link names are `Image Compressor` and `Audio Toolkit`. Each link is described by its
+summary. The arrow is decorative and hidden from the accessibility tree.
 
-- `http://127.0.0.1:4173/tools/does-not-exist` rendered `Page not found · Media Toolkit`.
-- Recovery links resolved through `<base href="/tools/">` to
-  `/tools/`, `/tools/image-compressor/` and `/tools/audio-toolkit/`.
+The deterministic suite covers the rest and ran after the redesign:
 
-## Screenshot limitation
+- `checks.txt` browser group: theme persistence, keyboard order, alias navigation with and
+  without JavaScript, 404, local-only requests, reduced motion, and blocked storage in Chromium
+  and WebKit.
+- `accessibility.json`: four axe runs, zero violations at any impact.
+- `redirects.json`: every alias assertion passes.
+- Request list: `/tools/` and `/tools/styles.css` only on a hub load. No third-party request.
 
-The in-app screenshot tool reported that it needs a visible desktop window and returned no
-image. Visual inspection used the Playwright captures in `captures/` at 1440 and 390 in light
-and dark, plus `mobile-320.png`, `404.png` and `redirect-no-js.png`. They show a two-column
-card grid at 1440, a single column at 390 and 320, readable contrast, and the theme control
-fitting beside the brand at 390.
+The in-app screenshot tool needs a visible desktop window and returned no image. Visual
+inspection used the retained Playwright captures instead.

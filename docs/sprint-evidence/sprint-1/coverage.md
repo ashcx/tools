@@ -3,19 +3,20 @@
 Authoritative acceptance state. States are VERIFIED, NOT VERIFIED, and INCONCLUSIVE. A check
 is VERIFIED only when a command or browser session produced the recorded result.
 
-Last updated: 2026-11-01, before the pull request.
+Last updated: 2026-11-01, after the minimal-page redesign and local verification, before the
+independent review and the pull request.
 
 ## Entry criteria
 
 | Condition | State | Evidence |
 | --- | --- | --- |
-| Execution authorized by the user | VERIFIED | user request 2026-11-01: "execute sprint 1 ... tell me when it is complete" |
+| Execution authorized by the user | VERIFIED | user request 2026-11-01: execute Sprint 1 and push the PR after review |
 | Canonical hub URL is `https://ashcx.github.io/tools/` | VERIFIED | user instruction 2026-11-01; `content-freeze.md` |
 | Both apps return 200 | VERIFIED | `curl` 2026-11-01: image 200, audio 200 |
 | Content freeze inputs read and revisions recorded | VERIFIED | `content-freeze.md` |
 | Node 22, npm, Playwright available | VERIFIED | `checks.txt`: Node v22.11.0, Playwright 1.64.1, Chromium and WebKit installed |
 | `gh` authenticated as `ashcx` | VERIFIED | `gh auth status`, account `ashcx` |
-| Audio worktree left untouched | VERIFIED | no audio repository command that writes was run |
+| Audio worktree left untouched | VERIFIED | no write command ran in the audio repository |
 
 ## Story acceptance
 
@@ -23,9 +24,9 @@ Last updated: 2026-11-01, before the pull request.
 
 | Condition | State | Evidence |
 | --- | --- | --- |
-| Brand, purpose sentence, two large cards with accurate copy | VERIFIED | `browser-session.md`; `captures/desktop-light.png`; `captures/mobile-light.png`; copy traced in `content-freeze.md` |
-| Both cards reach the destination with JavaScript disabled | VERIFIED | `checks.txt` browser group, no-JS alias in Chromium and WebKit; `captures/redirect-no-js.png` |
-| One `h1`, two `h2`, landmarks, skip link, no nested interactive elements | VERIFIED | `browser-session.md` accessibility tree; `checks.txt` browser group; `accessibility.json` zero violations |
+| Logo, name, one descriptor, two tool links with short summaries; no fact lists, footer, or repository links | VERIFIED | `browser-session.md`; `captures/desktop-light.png`; `captures/mobile-light.png`; `content-freeze.md` |
+| Both links reach the destination with JavaScript disabled | VERIFIED | `checks.txt` browser group, no-JS alias in Chromium and WebKit; `captures/redirect-no-js.png` |
+| One `h1`, two `h2`, landmarks, skip link, no nested interactive elements | VERIFIED | `browser-session.md`; `checks.txt` browser group; `accessibility.json` zero violations |
 
 ### S1-US02 responsive, themed, accessible
 
@@ -50,7 +51,7 @@ Last updated: 2026-11-01, before the pull request.
 | --- | --- | --- |
 | `npm test` serves `public/` at `/tools/` and runs every check | VERIFIED | `checks.txt`: seven groups pass, exit 0 |
 | Negative control fails as expected | VERIFIED | `checks.txt`: wrong alias canonical and third-party URL each exit 1 with expected and actual values; fixtures removed |
-| Deployed artifact has no test dependency | VERIFIED | `checks.txt` artifact listing; `node_modules` is the only untracked runtime directory and `.github` is not deployed |
+| Deployed artifact has no test dependency | VERIFIED | `checks.txt` artifact listing; `node_modules` and `.github` are not part of `public/` |
 
 ### S1-US05 CI, deploy, live evidence
 
@@ -65,12 +66,13 @@ Last updated: 2026-11-01, before the pull request.
 
 | Condition | State | Evidence |
 | --- | --- | --- |
-| `npm test` passes with recorded output | VERIFIED | `checks.txt`: `PASS all 7 groups in 8.0s`, exit 0 |
+| `npm test` passes with recorded output | VERIFIED | `checks.txt`: `PASS all 7 groups in 7.3s`, exit 0 |
 | `html-validate` passes on every deployed HTML file | VERIFIED | `checks.txt`: `npm run validate` exit 0 over `public` |
 | No runtime dependency, external font, analytics, cookie, or third-party request | VERIFIED | `checks.txt` links group; `browser-session.md` request list; `package.json` has dev dependencies only |
 | Desktop and mobile pages inspected in light and dark | VERIFIED | `browser-session.md`; captures at 1440, 390 and 320 |
 | Aliases work with JavaScript enabled and disabled | VERIFIED | `checks.txt` browser group, both engines |
 | Unknown paths return 404 with working recovery links | VERIFIED | `checks.txt` http group; `browser-session.md` |
-| Self-review complete and findings resolved | VERIFIED | card accessible name fixed and rechecked; keyboard chord made platform-adaptive and rerun |
+| Self-review complete and findings resolved | VERIFIED | palette aligned across hub, 404, aliases, and favicon; arrow SVGs made non-focusable; keyboard test updated; suite rerun |
 | Interrogate gate complete | NOT VERIFIED | pending |
 | Sprint PR open with evidence links | NOT VERIFIED | pending |
+| Live URL and deployment evidence | NOT VERIFIED | deployment follows the PR; not authorized yet |

@@ -7,7 +7,8 @@ Media Toolkit is a static hub that routes visitors to two browser-local tools:
 - [Audio Toolkit](https://ashcx.github.io/audio-toolkit-v1/) — ordered batch recipes for
   extracting, trimming, processing, and exporting audio.
 
-Status: planning complete. Implementation not started.
+Status: Sprint 1 implementation and local verification complete. Independent review pending. The
+PR is not created yet.
 
 Planned site: `https://ashcx.github.io/tools/` (not deployed; observed 404 on 2026-11-01).
 
@@ -35,7 +36,7 @@ older `/media-toolkit/` reference; aligning that sibling document is optional.
 
 | Sprint | Observable outcome | Status |
 | --- | --- | --- |
-| [1](Todo/sprint-1-tool-router.md) | Publish the Media Toolkit hub at `/tools/` with two tool cards, route aliases, and a recoverable 404 | Planned |
+| [1](Todo/sprint-1-tool-router.md) | Publish the Media Toolkit hub at `/tools/` with two tool links, route aliases, and a recoverable 404 | In progress |
 
 ## External follow-ups
 
@@ -49,14 +50,14 @@ These are separate repositories. They are not part of the hub PR.
 
 ## Final acceptance
 
-- [ ] `https://ashcx.github.io/tools/` returns 200 and renders both cards on desktop and
-      mobile, in light and dark themes.
+- [ ] `https://ashcx.github.io/tools/` returns 200 and renders the logo, name, descriptor, and
+      two links on desktop and mobile, in light and dark themes.
 - [ ] `/tools/image-compressor/` reaches the live Image Compressor.
 - [ ] `/tools/audio-toolkit/` reaches the live Audio Toolkit.
 - [ ] Unknown paths return an HTTP 404 page with working recovery links.
-- [ ] `npm test` passes, including link, redirect, accessibility, keyboard, no-JavaScript, and
+- [x] `npm test` passes, including link, redirect, accessibility, keyboard, no-JavaScript, and
       404 checks.
-- [ ] Desktop and mobile captures are inspected and retained.
+- [x] Desktop and mobile captures are inspected and retained.
 - [ ] Independent interrogate verdict is recorded in
       `docs/sprint-evidence/sprint-1/interrogate.md`.
 - [ ] The sprint PR is open and links the plan, evidence, and verdict.
@@ -69,5 +70,5 @@ These are separate repositories. They are not part of the hub PR.
 Read [orchestration](Todo/orchestration-plan.md), [Scrum policy](Todo/redesign-scrum-plan.md),
 and [Sprint 1](Todo/sprint-1-tool-router.md).
 
-The current request was planning-only. It does not authorize implementation, repository
-creation, or deployment.
+The user authorized execution on 2026-11-01 and asked for the PR after an independent review.
+Merge and deployment are not authorized yet.
