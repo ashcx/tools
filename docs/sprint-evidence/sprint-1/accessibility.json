@@ -1,0 +1,63 @@
+{
+  "checkedAt": "2026-11-01T07:36:30.190Z",
+  "tags": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa"
+  ],
+  "failOn": [
+    "serious",
+    "critical"
+  ],
+  "runs": [
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "counts": {
+        "violations": 0,
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "violations": []
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "counts": {
+        "violations": 0,
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "violations": []
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "counts": {
+        "violations": 0,
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "violations": []
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "counts": {
+        "violations": 0,
+        "serious": 0,
+        "critical": 0,
+        "moderate": 0,
+        "minor": 0
+      },
+      "violations": []
+    }
+  ]
+}

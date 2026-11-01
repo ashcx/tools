@@ -7,12 +7,13 @@ A small static hub for two browser-local tools:
 - [Audio Toolkit](https://ashcx.github.io/audio-toolkit-v1/) — process audio and video
   soundtracks with one ordered batch recipe.
 
-Planned live site: `https://ashcx.github.io/tools/` (not deployed).
+Live site: `https://ashcx.github.io/tools/` (deployment pending the sprint pull request).
 
 The GitHub repository must be named `tools` so GitHub Pages serves it at `/tools/`. The local
 folder is named `media-toolkit`; the brand is Media Toolkit. The name difference is intentional.
 
-Status: planning complete. Implementation has not started.
+Status: Sprint 1 implementation complete and locally verified. CI, deployment, and live checks
+are pending the pull request.
 
 ## Stack
 
@@ -56,7 +57,7 @@ request. The only stored value is the theme choice in
 The hub does not process files and does not embed the apps. Each card opens the tool's own
 site, where processing stays on the device.
 
-## Planned layout
+## Layout
 
 ```text
 public/                         deployed artifact
@@ -76,10 +77,8 @@ Todo/                           roadmap, orchestration, Scrum policy, sprint pla
 
 ## Development and verification
 
-These commands apply after Sprint 1 is implemented. The repository currently contains only the
-plan.
-
-Requires Node.js 22+ and npm.
+These commands run the local server and the full verification suite. Requires Node.js 22+ and
+npm.
 
 ```sh
 npm ci
@@ -103,14 +102,17 @@ The public `ashcx/tools` repository deploys `public/` from `main` through
 `.github/workflows/pages.yml`. CI runs `npm test` on pull requests. Deployment requires a
 successful workflow run and a live check; local success alone is not deployment evidence.
 
+## Verification
+
+`npm run validate` runs html-validate over the artifact. `npm test` accepts `--only` with any
+of `links`, `redirects`, `html`, `http`, `browser`, `axe` and `captures`, and `--public <dir>` to
+run the same checks against another copy of the artifact.
+
 ## Planning
 
 Read [TODO.md](TODO.md), [the orchestration plan](Todo/orchestration-plan.md),
 [the Scrum policy](Todo/redesign-scrum-plan.md), and
 [Sprint 1](Todo/sprint-1-tool-router.md).
-
-The current request was planning-only. Implementation, repository creation, and deployment
-require a separate go-ahead.
 
 ## Related repositories
 

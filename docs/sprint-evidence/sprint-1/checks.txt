@@ -1,0 +1,52 @@
+# Sprint 1 local checks
+
+Run at: 2026-11-01T07:35:25Z
+Node: v22.11.0  npm: 10.9.0
+Playwright: 1.64.1  html-validate: 10.0.0  axe: 4.13.0
+
+$ npm run validate
+
+> media-toolkit-hub@1.0.0 validate
+> html-validate public
+
+exit=0
+
+$ npm test
+PASS links (0.0s)
+PASS redirects (0.0s)
+PASS html (0.2s)
+PASS http (0.0s)
+PASS browser (5.7s)
+PASS axe (1.5s)
+PASS captures (0.7s)
+PASS all 7 groups in 8.0s
+exit=0
+
+$ node scripts/verify.mjs --only links,redirects,html,http
+PASS links (0.0s)
+PASS redirects (0.0s)
+PASS html (0.2s)
+PASS http (0.0s)
+PASS all 4 groups in 0.2s
+exit=0
+
+Negative control 1: wrong alias destination
+$ node scripts/verify.mjs --only redirects --public /tmp/mt-neg-alias
+FAIL redirects (0.0s)
+  1 alias assertion(s) failed
+  /tools/audio-toolkit/ fails canonical
+    expected ["https://ashcx.github.io/audio-toolkit-v1/"]
+    actual   ["https://example.com/audio/"]
+FAIL 1 of 1 groups in 0.0s: redirects
+exit=1
+fixture removed: yes
+
+Negative control 2: third-party request in the hub
+$ node scripts/verify.mjs --only links --public /tmp/mt-neg-link
+FAIL links (0.0s)
+  <img src="https://tracker.example/pixel.png"> in index.html is an absolute URL outside the allowlist
+    expected ["https://ashcx.github.io/image-compressor-v1/","https://ashcx.github.io/audio-toolkit-v1/","https://github.com/ashcx/*"]
+    actual   "https://tracker.example/pixel.png"
+FAIL 1 of 1 groups in 0.0s: links
+exit=1
+fixture removed: yes
