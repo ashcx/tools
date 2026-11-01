@@ -207,8 +207,7 @@ function artifactFileFor(artifactRoot, pathname) {
 }
 
 function isAllowedAbsoluteUrl(value) {
-  if (ALIASES.some((alias) => value === alias.destination || value.startsWith(alias.destination))) return true;
-  return /^https:\/\/github\.com\/ashcx\/[^\s]+$/.test(value);
+  return ALIASES.some((alias) => value === alias.destination || value.startsWith(alias.destination));
 }
 
 async function checkLinks(artifactRoot) {
@@ -241,7 +240,7 @@ async function checkLinks(artifactRoot) {
         if (resolved.origin !== ARTIFACT_ORIGIN) {
           check(
             isAllowedAbsoluteUrl(resolved.href),
-            `<${tag.name} ${attribute}="${value}"> in ${pageLabel} is an absolute URL outside the allowlist\n    expected ${format(ALIASES.map((alias) => alias.destination).concat('https://github.com/ashcx/*'))}\n    actual   ${format(resolved.href)}`,
+            `<${tag.name} ${attribute}="${value}"> in ${pageLabel} is an absolute URL outside the allowlist\n    expected ${format(ALIASES.map((alias) => alias.destination))}\n    actual   ${format(resolved.href)}`,
           );
           continue;
         }
@@ -454,6 +453,21 @@ async function checkLayout(browser, server) {
     await page.goto(server.url + HUB_ROUTE);
 
     assertEqual(await page.locator('h1').count(), 1, 'the hub has exactly one h1');
+    assertEqual(await page.locator('h1').textContent(), 'Media Toolkit', 'the h1 names the brand');
+    assertEqual(
+      await page.locator('.brand__lede').textContent(),
+      'Two browser-local tools for images and audio.',
+      'the descriptor is one short line',
+    );
+    assertEqual(await page.locator('header a').count(), 0, 'the header has no brand link');
+    assertEqual(await page.locator('header .theme-control').count(), 1, 'the header holds the theme control');
+    assertEqual(await page.locator('nav.tool-grid').count(), 1, 'the tools sit in one navigation region');
+    assertEqual(await page.locator('footer').count(), 0, 'the hub has no footer');
+    assertEqual(
+      await page.locator('footer, dl, .footer-links, .tool-card__facts, .tool-card__cta').count(),
+      0,
+      'the page has no footer, fact list, or call to action',
+    );
     assertEqual(await page.locator('h2').count(), 2, 'the hub has exactly two h2');
     assertEqual(await page.locator('.tool-card').count(), 2, 'the hub has exactly two cards');
     assertEqual(await page.locator('.tool-card h2').count(), 2, 'both h2 sit inside the cards');
@@ -462,6 +476,30 @@ async function checkLayout(browser, server) {
       ['Image Compressor', 'Audio Toolkit'],
       'the card headings are Image Compressor and Audio Toolkit',
     );
+    assertEqual(
+      await page.locator('.tool-card__arrow[aria-hidden="true"]').count(),
+      2,
+      'both tool arrows are hidden from assistive technology',
+    );
+    assertEqual(
+      await page
+        .locator('.tool-card a, .tool-card button, .tool-card input, .tool-card select, .tool-card textarea')
+        .count(),
+      0,
+      'the cards contain no nested interactive elements',
+    );
+
+    for (const alias of ALIASES) {
+      const card = page.locator(alias.card);
+      const labelledBy = await card.getAttribute('aria-labelledby');
+      const describedBy = await card.getAttribute('aria-describedby');
+      check(Boolean(labelledBy && describedBy), `${alias.name} card names its heading and summary`);
+      assertEqual(await page.locator(`#${labelledBy}`).textContent(), alias.name, `${alias.name} card heading is referenced`);
+      check(
+        (await page.locator(`#${describedBy}`).textContent()).length > 0,
+        `${alias.name} card summary is referenced`,
+      );
+    }
 
     const cardHrefs = await page.locator('.tool-card').evaluateAll((cards) => cards.map((card) => card.href));
     assertDeepEqual(
@@ -475,36 +513,59 @@ async function checkLayout(browser, server) {
       assertDeepEqual(facts.canonical, [alias.destination], `the served alias ${alias.route} targets the live app`);
     }
 
-    const imageCard = await page.locator('.tool-card--image').boundingBox();
-    const audioCard = await page.locator('.tool-card--audio').boundingBox();
-    check(imageCard !== null && audioCard !== null, 'both cards have a layout box at 1440');
-    check(
-      Math.abs(imageCard.y - audioCard.y) <= 1,
-      `the cards share a row at 1440\n    expected |top difference| <= 1px\n    actual   ${format(Math.abs(imageCard.y - audioCard.y))}px`,
-    );
-    check(
-      audioCard.x > imageCard.x,
-      `the audio card sits to the right at 1440\n    expected left > ${format(imageCard.x)}\n    actual   ${format(audioCard.x)}`,
-    );
-
-    await page.setViewportSize(MOBILE);
-    const stackedImage = await page.locator('.tool-card--image').boundingBox();
-    const stackedAudio = await page.locator('.tool-card--audio').boundingBox();
-    check(
-      stackedAudio.y > stackedImage.y + 1,
-      `the cards stack at 390\n    expected audio top > image top + 1\n    actual   image ${format(stackedImage.y)}, audio ${format(stackedAudio.y)}`,
-    );
-
-    for (const width of [320, 390, 768, 1440]) {
-      await page.setViewportSize({ width, height: width < 760 ? MOBILE.height : DESKTOP.height });
-      const metrics = await page.evaluate(() => ({
-        scrollWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
-        clientWidth: document.documentElement.clientWidth,
-      }));
-      check(
-        metrics.scrollWidth <= metrics.clientWidth + 1,
-        `no horizontal overflow at ${width}\n    expected scrollWidth <= ${metrics.clientWidth + 1}\n    actual   scrollWidth ${metrics.scrollWidth}`,
+    const targets = await page
+      .locator('.skip-link, .theme-control__option, .tool-card')
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const rect = element.getBoundingClientRect();
+          return { label: element.className || element.tagName.toLowerCase(), width: rect.width, height: rect.height };
+        }),
       );
+    for (const target of targets) {
+      check(
+        target.width >= 44 && target.height >= 44,
+        `the ${target.label} target is at least 44 by 44\n    expected width and height >= 44\n    actual   ${target.width} by ${target.height}`,
+      );
+    }
+
+    for (const [width, stacked] of [
+      [390, true],
+      [759, true],
+      [768, false],
+      [1440, false],
+    ]) {
+      await page.setViewportSize({ width, height: width < 760 ? MOBILE.height : DESKTOP.height });
+      const image = await page.locator('.tool-card--image').boundingBox();
+      const audio = await page.locator('.tool-card--audio').boundingBox();
+      if (stacked) {
+        check(
+          audio.y > image.y + 1,
+          `the cards stack at ${width}\n    expected audio top > image top + 1\n    actual   image ${format(image.y)}, audio ${format(audio.y)}`,
+        );
+      } else {
+        check(
+          Math.abs(image.y - audio.y) <= 1 && audio.x > image.x,
+          `the cards share a row at ${width}\n    expected the same top and audio left > image left\n    actual   image ${format(image)}, audio ${format(audio)}`,
+        );
+      }
+    }
+
+    for (const scheme of ['light', 'dark']) {
+      if (scheme === 'dark') {
+        await page.emulateMedia({ colorScheme: 'dark' });
+        await waitForTheme(page, 'dark', 'the layout recheck runs in the dark theme');
+      }
+      for (const width of [320, 390, 768, 1440]) {
+        await page.setViewportSize({ width, height: width < 760 ? MOBILE.height : DESKTOP.height });
+        const metrics = await page.evaluate(() => ({
+          scrollWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+          clientWidth: document.documentElement.clientWidth,
+        }));
+        check(
+          metrics.scrollWidth <= metrics.clientWidth + 1,
+          `no horizontal overflow in the ${scheme} theme at ${width}\n    expected scrollWidth <= ${metrics.clientWidth + 1}\n    actual   scrollWidth ${metrics.scrollWidth}`,
+        );
+      }
     }
   });
 }
@@ -552,6 +613,14 @@ async function checkTheme(browser, server) {
 
     await page.emulateMedia({ colorScheme: 'light' });
     await waitForTheme(page, 'light', 'system follows a live change to the light scheme');
+
+    await clickThemeLabel(page, 'light');
+    assertEqual(await themeOf(page), 'light', 'choosing light applies data-theme="light"');
+    assertEqual(await storedTheme(page), 'light', 'choosing light stores "light"');
+    assertEqual(await page.locator('#theme-light').isChecked(), true, 'choosing light checks the light radio');
+    await page.reload();
+    assertEqual(await themeOf(page), 'light', 'data-theme stays light after a reload');
+    assertEqual(await page.locator('#theme-light').isChecked(), true, 'the light radio stays checked after a reload');
   });
 }
 
@@ -587,6 +656,15 @@ async function checkKeyboard(browser, server) {
       `the first ${tabKey} stop is the skip link`,
     );
 
+    const skipFocus = await page.evaluate(() => {
+      const style = getComputedStyle(document.activeElement);
+      return { style: style.outlineStyle, width: Number.parseFloat(style.outlineWidth) || 0 };
+    });
+    check(
+      skipFocus.style === 'solid' && skipFocus.width >= 1,
+      `the skip link draws an outline\n    expected outline-style solid and outline-width >= 1px\n    actual   ${skipFocus.style}, ${skipFocus.width}px`,
+    );
+
     await page.keyboard.press('Enter');
     assertEqual(
       await page.evaluate(() => document.activeElement?.id ?? null),
@@ -606,7 +684,7 @@ async function checkKeyboard(browser, server) {
             tag: element.tagName.toLowerCase(),
             id: element.id,
             className: typeof element.className === 'string' ? element.className : '',
-            text: (element.textContent ?? '').replace(/\s+/g, ' ').trim(),
+            checked: element.checked === true,
             outlineStyle: style.outlineStyle,
             outlineWidth: Number.parseFloat(style.outlineWidth) || 0,
           };
@@ -616,7 +694,7 @@ async function checkKeyboard(browser, server) {
 
     check(stops[0].className.includes('skip-link'), `the first ${tabKey} stop is the skip link\n    expected a .skip-link\n    actual   ${format(stops[0])}`);
     check(
-      stops[1].tag === 'input' && stops[1].id.startsWith('theme-'),
+      stops[1].tag === 'input' && stops[1].id.startsWith('theme-') && stops[1].checked === true,
       `the theme group is reachable with ${tabKey}\n    expected the checked theme radio\n    actual   ${format(stops[1])}`,
     );
     check(
@@ -634,6 +712,24 @@ async function checkKeyboard(browser, server) {
         `the focused card draws an outline\n    expected outline-style solid and outline-width >= 1px\n    actual   ${stop.outlineStyle}, ${stop.outlineWidth}px`,
       );
     }
+
+    await page.goto(server.url + HUB_ROUTE);
+    await page.keyboard.press(tabKey);
+    await page.keyboard.press(tabKey);
+    const themeFocus = await page.evaluate(() => {
+      const input = document.activeElement;
+      const label = input && input.id ? document.querySelector(`label[for="${input.id}"]`) : null;
+      const style = label ? getComputedStyle(label) : null;
+      return {
+        id: input?.id ?? null,
+        outlineStyle: style?.outlineStyle ?? null,
+        outlineWidth: style ? Number.parseFloat(style.outlineWidth) || 0 : 0,
+      };
+    });
+    check(
+      themeFocus.id?.startsWith('theme-') && themeFocus.outlineStyle === 'solid' && themeFocus.outlineWidth >= 1,
+      `the focused theme option draws an outline\n    expected a theme radio and outline-style solid with width >= 1px\n    actual   ${format(themeFocus)}`,
+    );
   });
 }
 
@@ -671,12 +767,18 @@ async function checkAliasNavigation(browser, server) {
         1,
         `clicking the ${alias.name} card loads the ${alias.marker} app document`,
       );
+      await page.goBack();
+      assertEqual(
+        new URL(page.url()).pathname,
+        HUB_ROUTE,
+        `the ${alias.name} alias leaves no entry in history`,
+      );
       await page.close();
     }
   });
 }
 
-async function checkAliasWithoutJavaScript(browser, server, engineName, skips) {
+async function checkAliasWithoutJavaScript(browser, server, engineName) {
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: DESKTOP });
   try {
     await interceptApps(context);
@@ -687,16 +789,45 @@ async function checkAliasWithoutJavaScript(browser, server, engineName, skips) {
       try {
         await page.waitForURL(alias.destination, { timeout: 10000 });
       } catch {
-        skips.push(
-          `${engineName} could not complete ${alias.route} with JavaScript disabled within 10s, so the noscript refresh is unproven on this engine`,
-        );
-        continue;
+        try {
+          await page.locator(`main a[href="${alias.destination}"]`).first().click({ timeout: 5000 });
+          await page.waitForURL(alias.destination, { timeout: 10000 });
+          console.log(`NOTE browser: ${engineName} reached ${alias.route} through the visible fallback`);
+        } catch {
+          throw new CheckFailure(
+            `${alias.route} does not reach ${alias.destination} with JavaScript disabled\n    expected the noscript refresh or the visible fallback to navigate\n    actual   neither path reached the destination`,
+          );
+        }
       }
       assertEqual(page.url(), alias.destination, `${alias.route} reaches the live app with JavaScript disabled`);
       assertEqual(
         await page.locator(`[data-stub="${alias.marker}"]`).count(),
         1,
         `${alias.route} loads the ${alias.marker} app document with JavaScript disabled`,
+      );
+    }
+  } finally {
+    await context.close();
+  }
+}
+
+async function checkAliasFallbackLayout(browser, server) {
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: MOBILE.height } });
+  try {
+    for (const alias of ALIASES) {
+      await context.route(`${alias.destination}**`, (route) => route.fulfill({ status: 204, body: '' }));
+    }
+    const page = await context.newPage();
+    for (const alias of ALIASES) {
+      await page.goto(server.url + alias.route);
+      await page.locator('main h1').waitFor();
+      const metrics = await page.evaluate(() => ({
+        scrollWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      check(
+        metrics.scrollWidth <= metrics.clientWidth + 1,
+        `${alias.route} fallback has no horizontal overflow at 320\n    expected scrollWidth <= ${metrics.clientWidth + 1}\n    actual   scrollWidth ${metrics.scrollWidth}`,
       );
     }
   } finally {
@@ -747,12 +878,14 @@ async function checkReducedMotion(browser, server) {
 async function checkBlockedStorage(browser, server) {
   await withContext(browser, { viewport: DESKTOP }, async (context) => {
     await context.addInitScript(() => {
-      Object.defineProperty(Storage.prototype, 'setItem', {
-        configurable: true,
-        value() {
-          throw new DOMException('storage blocked', 'SecurityError');
-        },
-      });
+      for (const method of ['getItem', 'setItem']) {
+        Object.defineProperty(Storage.prototype, method, {
+          configurable: true,
+          value() {
+            throw new DOMException('storage blocked', 'SecurityError');
+          },
+        });
+      }
     });
 
     const page = await context.newPage();
@@ -772,7 +905,6 @@ async function checkBlockedStorage(browser, server) {
 }
 
 async function checkBrowser(server) {
-  const skips = [];
   const engines = [
     ['chromium', chromium],
     ['webkit', webkit],
@@ -796,9 +928,8 @@ async function checkBrowser(server) {
       await scoped('theme', () => checkTheme(browser, server));
       await scoped('keyboard', () => checkKeyboard(browser, server));
       await scoped('alias navigation', () => checkAliasNavigation(browser, server));
-      await scoped('alias without JavaScript', () =>
-        checkAliasWithoutJavaScript(browser, server, engineName, skips),
-      );
+      await scoped('alias without JavaScript', () => checkAliasWithoutJavaScript(browser, server, engineName));
+      await scoped('alias fallback layout', () => checkAliasFallbackLayout(browser, server));
       await scoped('404', () => checkNotFound(browser, server));
       await scoped('local-only load', () => checkLocalOnlyLoad(browser, server));
       await scoped('reduced motion', () => checkReducedMotion(browser, server));
@@ -806,10 +937,6 @@ async function checkBrowser(server) {
     } finally {
       await browser.close();
     }
-  }
-
-  for (const skip of skips) {
-    console.log(`SKIP browser: ${skip}`);
   }
 }
 
@@ -893,6 +1020,7 @@ async function checkCaptures(server) {
       { file: 'mobile-light.png', viewport: MOBILE, colorScheme: 'light', path: HUB_ROUTE },
       { file: 'mobile-dark.png', viewport: MOBILE, colorScheme: 'dark', path: HUB_ROUTE },
       { file: 'mobile-320.png', viewport: { width: 320, height: MOBILE.height }, colorScheme: 'light', path: HUB_ROUTE },
+      { file: 'tablet-768.png', viewport: { width: 768, height: 1024 }, colorScheme: 'light', path: HUB_ROUTE },
       { file: '404.png', viewport: DESKTOP, colorScheme: 'light', path: '/tools/nope/' },
     ];
 

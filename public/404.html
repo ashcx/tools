@@ -102,8 +102,7 @@
     transition: border-color 150ms ease;
   }
 
-  .links a::after {
-    content: "\2192";
+  .link-arrow {
     color: var(--muted);
   }
 
@@ -129,9 +128,9 @@
   <h1>Page not found</h1>
   <p>That page was not found. Try one of these instead.</p>
   <ul class="links">
-    <li><a href="./">Media Toolkit home</a></li>
-    <li><a href="./image-compressor/">Image Compressor</a></li>
-    <li><a href="./audio-toolkit/">Audio Toolkit</a></li>
+    <li><a href="./">Media Toolkit home <span class="link-arrow" aria-hidden="true">&rarr;</span></a></li>
+    <li><a href="./image-compressor/">Image Compressor <span class="link-arrow" aria-hidden="true">&rarr;</span></a></li>
+    <li><a href="./audio-toolkit/">Audio Toolkit <span class="link-arrow" aria-hidden="true">&rarr;</span></a></li>
   </ul>
 </main>
 </body>
